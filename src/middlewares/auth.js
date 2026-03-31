@@ -1,5 +1,5 @@
 import { verifyToken } from "../helpers/token.js";
-import User from "../models/User.js";
+import { User } from "../models/index.js";
 
 export const authentication = (req, res, next) => {
   try {

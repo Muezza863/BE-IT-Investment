@@ -1,6 +1,6 @@
 // src/controllers/projectController.js
-import Project from '../models/Project.js'
-import { generateProjectDraft } from '../services/llmService.js'
+import { Project } from '../models/index.js'
+import { generateProjectDraft } from '../services/index.js'
 
 const createProject = async (req, res) => {
   try {
