@@ -36,7 +36,7 @@ const projectSchema = new mongoose.Schema({
   
   status: { 
     type: String, 
-    enum: ['DRAFTING', 'WAITING_USER_INPUT', 'CALCULATED'], 
+    enum: ['DRAFTING', 'WAITING_USER_INPUT', 'CALCULATED', 'ERROR'], 
     default: 'DRAFTING' 
   },
   
