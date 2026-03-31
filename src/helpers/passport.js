@@ -1,16 +1,16 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { User } from '../models/User.js';
+import User from '../models/User.js';
 
 /* ===============================
    GOOGLE STRATEGY (OAuth)
 ================================ */
 passport.use(new GoogleStrategy(
   {
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    clientID: process.env.GOOGLE_CLIENT_ID || 'dummy-client-id',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy-client-secret',
+    callbackURL: "/api/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -37,11 +37,11 @@ passport.use(new GoogleStrategy(
 passport.use(new JwtStrategy(
   {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.JWT_SECRET
+    secretOrKey: process.env.JWT_SECRET || 'SUPERSECRETKEY'
   },
   async (payload, done) => {
     try {
-      const user = await User.findById(payload.id);
+      const user = await User.findById(payload.userId || payload.id);
       if (!user) return done(null, false);
 
       return done(null, user);

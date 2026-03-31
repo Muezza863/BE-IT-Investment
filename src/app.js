@@ -4,8 +4,7 @@ import cors from "cors";
 import multer from "multer";
 import "./services/db.js";
 import projectRoutes from "./routes/index.js";
-
-
+import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +19,7 @@ app.use(upload.none());
 
 app.use("/api", projectRoutes);
 
+app.use(errorHandler);
 
 app.get("/test", (req, res) => {
     res.status(200).json({
