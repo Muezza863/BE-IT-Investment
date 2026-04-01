@@ -18,13 +18,21 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password before saving
-userSchema.pre("save", function (next) {
-  if (!this.isModified("password")) {
-    return next();
+// =======================
+// 🔐 HASH PASSWORD (FIXED)
+// =======================
+userSchema.pre("save", async function () {
+  try {
+    // kalau password tidak diubah → skip
+    if (!this.isModified("password")) return;
+
+    console.log("🔥 hashing password...");
+
+    this.password = await hash(this.password);
+
+  } catch (error) {
+    throw error; // biar ke-handle oleh controller
   }
-  this.password = hash(this.password);
-  next();
 });
 
 export default mongoose.model("User", userSchema);
