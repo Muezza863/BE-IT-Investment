@@ -1,24 +1,27 @@
 import { verifyToken } from "../helpers/token.js";
-import User from "../models/User.js"; // ✅ FIX
+import { User } from "../models/index.js"; // Updated to match your main model import
 
 // =======================
 // 🔐 AUTHENTICATION (JWT)
+// Middleware for protecting routes like /profile, /update-profile
 // =======================
 export const authentication = (req, res, next) => {
   console.log("Authentication middleware triggered");
+
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized - Token required",
+        message: "Unauthorized: Token required",
       });
     }
 
     const token = authHeader.split(" ")[1];
     const decoded = verifyToken(token);
 
+    // Attach user info to request object
     req.user = {
       id: decoded.id,
       email: decoded.email,
@@ -36,9 +39,11 @@ export const authentication = (req, res, next) => {
 
 // =======================
 // 🔒 AUTHORIZATION (OWNER)
+// Optional middleware to allow users to modify only their own data
 // =======================
 export const authorization = async (req, res, next) => {
   console.log("Authorization middleware triggered");
+
   try {
     const { id } = req.params;
 
@@ -49,19 +54,19 @@ export const authorization = async (req, res, next) => {
       });
     }
 
-    const data = await User.findById(id);
+    const userData = await User.findById(id);
 
-    if (!data) {
+    if (!userData) {
       return res.status(404).json({
         success: false,
-        message: "Data not found",
+        message: "User not found",
       });
     }
 
-    if (data._id.toString() !== req.user.id.toString()) {
+    if (userData._id.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         success: false,
-        message: "Forbidden - You are not allowed",
+        message: "Forbidden: You are not allowed to perform this action",
       });
     }
 

@@ -1,11 +1,21 @@
 import { Router } from "express";
 import passport from "../config/passport.js";
-import { register, login } from "../controllers/authController.js";
+import authMiddleware from "../middleware/auth.js";
+
+import {
+  register,
+  login,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+  getProfile,
+  updateProfile,
+} from "../controllers/authController.js";
 
 const router = Router();
 
 // =======================
-// 🔐 BASIC AUTH (JWT)
+// 🔐 AUTH (JWT)
 // =======================
 router.post("/register", register);
 router.post("/login", login);
@@ -13,17 +23,14 @@ router.post("/login", login);
 // =======================
 // 🔵 GOOGLE AUTH
 // =======================
-
-// 🔹 STEP 1: redirect ke Google
 router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    session: false, // ✅ FIX WAJIB
+    session: false,
   })
 );
 
-// 🔹 STEP 2: callback dari Google
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -37,15 +44,33 @@ router.get(
       success: true,
       message: "Google login berhasil",
       token,
-      user: {
-        id: user.id, // ✅ FIX
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-      },
+      user,
     });
   }
 );
+
+// =======================
+// 🔐 FORGOT PASSWORD FLOW
+// =======================
+
+// 📩 STEP 1: Input Email (Confirm Email Page)
+router.post("/forgot-password", forgotPassword);
+
+// 🔢 STEP 2: Confirm OTP Page
+router.post("/verify-otp", verifyOtp);
+
+// 🔑 STEP 3: Reset Password Page
+router.post("/reset-password", resetPassword);
+
+// =======================
+// 👤 EDIT PROFILE PAGE
+// =======================
+
+// 📥 Load data profile
+router.get("/profile", authMiddleware, getProfile);
+
+// 💾 Save changes
+router.put("/profile", authMiddleware, updateProfile);
 
 // =======================
 // ❌ FAILURE
