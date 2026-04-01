@@ -15,15 +15,35 @@ const getBusinessScale = (employeeCount) => {
 
 const createProject = async (req, res) => {
   try {
-    // Menghilangkan projectName dan description dari input user
-    // Menambahkan employeeCount untuk menentukan business scale
-    const { industry, employeeCount, plan, location } = req.body;
+    const { 
+      industry, employeeCount, plan, location,
+      businessDomain, technologyDomain, currentIT, futureIT, DM, RE 
+    } = req.body;
 
-    // 1. Validasi input dasar
-    if (!industry || !employeeCount || !plan || !location) {
+    // 1. Validasi input dasar (Level 1)
+    if (
+      !industry || employeeCount === undefined || !plan || !location ||
+      !businessDomain || !technologyDomain || 
+      currentIT === undefined || futureIT === undefined || 
+      DM === undefined || RE === undefined
+    ) {
       return res.status(400).json({ 
         status: 'error', 
-        message: 'All fields (industry, employeeCount, plan, location) are required!' 
+        message: 'All base fields (industry, employeeCount, plan, location, businessDomain, technologyDomain, currentIT, futureIT, DM, RE) are required!' 
+      });
+    }
+
+    // Validasi pengecekan isi objek (Level 2)
+    const { SM, CA, MI, CR, OR } = businessDomain;
+    const { SA, DU, TU, IR } = technologyDomain;
+
+    if (
+      SM === undefined || CA === undefined || MI === undefined || CR === undefined || OR === undefined ||
+      SA === undefined || DU === undefined || TU === undefined || IR === undefined
+    ) {
+      return res.status(400).json({ 
+        status: 'error', 
+        message: 'All nested fields inside businessDomain (SM, CA, MI, CR, OR) and technologyDomain (SA, DU, TU, IR) are strictly required!' 
       });
     }
 
@@ -40,6 +60,12 @@ const createProject = async (req, res) => {
       scale,
       plan,
       location,
+      businessDomain: { SM, CA, MI, CR, OR },
+      technologyDomain: { SA, DU, TU, IR },
+      currentIT,
+      futureIT,
+      DM,
+      RE,
       status: 'DRAFTING', // Setup awal, menunggu proses AI
       // llmBaseDraft dibiarkan kosong
     });
