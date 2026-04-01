@@ -48,10 +48,25 @@ const projectSchema = new mongoose.Schema({
     TU: { type: Number, required: true },
     IR: { type: Number, required: true },
   },
-  currentIT: { type: Number, required: true },
-  futureIT: { type: Number, required: true },
-  DM: { type: Number, required: true },
-  RE: { type: Number, required: true },
+  currentIT: { type: [Number], required: true },
+  futureIT: { type: [Number], required: true },
+  DM: { type: [Number], required: true },
+  RE: { type: [Number], required: true },
+
+  // Penambahan untuk menyimpan hasil kalkulasi mcfarlan
+  mcfarlan: {
+    averages: {
+      currentIT: Number,
+      futureIT: Number,
+      DM: Number,
+      RE: Number
+    },
+    coordinates: {
+      x: Number,
+      y: Number
+    },
+    quadrant: String
+  },
 
   status: { 
     type: String, 

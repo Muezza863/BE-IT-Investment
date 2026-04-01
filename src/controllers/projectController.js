@@ -1,7 +1,5 @@
-// src/controllers/projectController.js
 import { Project } from '../models/index.js'
-import { generateProjectDraft } from '../services/index.js'
-
+import { generateProjectDraft, determineMcFarlanQuadrant } from '../services/index.js'
 // Fungsi untuk mengelompokkan skala bisnis berdasarkan jumlah karyawan
 const getBusinessScale = (employeeCount) => {
   const count = parseInt(employeeCount, 10);
@@ -50,6 +48,9 @@ const createProject = async (req, res) => {
     // 2. Terjemahkan jumlah karyawan ke kelompok skala bisnis
     const scale = getBusinessScale(employeeCount);
 
+    // Hitung posisi McFarlan Strategic Grid berdasarkan skor kuesioner
+    const mcfarlanResult = determineMcFarlanQuadrant(currentIT, futureIT, DM, RE);
+
     // 3. Simpan proyek awal ke Database (MongoDB) dengan status DRAFTING
     const defaultProjectName = `IT Project - ${industry}`;
     const defaultDescription = `IT solution implementation for ${scale} scale in ${location} area.`;
@@ -66,6 +67,7 @@ const createProject = async (req, res) => {
       futureIT,
       DM,
       RE,
+      mcfarlan: mcfarlanResult,
       status: 'DRAFTING', // Setup awal, menunggu proses AI
       // llmBaseDraft dibiarkan kosong
     });
@@ -141,6 +143,7 @@ const getProjectDraft = async (req, res) => {
         status: project.status,
         expiresAt: project.expiresAt,
         calculatedScale: project.scale,
+        mcfarlan: project.mcfarlan,
         draft: project.llmBaseDraft
       }
     });
