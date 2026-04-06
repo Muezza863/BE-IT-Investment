@@ -145,6 +145,71 @@
 
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* Chatbot Styles */
+    .chatbot-trigger {
+      position: fixed; bottom: 2rem; right: 2rem;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--accent-gradient);
+      color: white; font-size: 1.5rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: var(--shadow-glow), var(--shadow-card);
+      z-index: 100; transition: var(--transition); border: none;
+    }
+    .chatbot-trigger:hover { transform: scale(1.1) rotate(5deg); }
+    
+    .chatbot-window {
+      position: fixed; bottom: 6rem; right: 2rem;
+      width: 380px; max-height: 500px; height: 60vh;
+      background: var(--bg-secondary);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px; box-shadow: var(--shadow-card);
+      display: flex; flex-direction: column; overflow: hidden;
+      z-index: 99; opacity: 0; pointer-events: none;
+      transform: translateY(20px); transition: var(--transition);
+      backdrop-filter: blur(12px);
+    }
+    .chatbot-window.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    
+    .chatbot-header {
+      padding: 1rem; background: var(--surface-glass);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .chatbot-header h4 { font-size: 1rem; color: #fff; margin: 0; }
+    .chatbot-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+    
+    .chatbot-body {
+      flex: 1; padding: 1rem; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .chat-bubble {
+      max-width: 80%; padding: 0.8rem 1rem; border-radius: 16px; font-size: 0.9rem; line-height: 1.4;
+    }
+    .chat-bubble.user {
+      align-self: flex-end; background: var(--accent-gradient); color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble.assistant, .chat-bubble.system {
+      align-self: flex-start; background: rgba(255, 255, 255, 0.05); color: var(--text-main);
+      border: 1px solid var(--glass-border); border-bottom-left-radius: 4px;
+    }
+    
+    .chatbot-footer {
+      padding: 1rem; border-top: 1px solid var(--glass-border);
+      display: flex; gap: 0.5rem; background: var(--bg-primary);
+    }
+    .chatbot-input {
+      flex: 1; background: var(--bg-secondary); border: 1px solid var(--glass-border);
+      padding: 0.6rem 1rem; border-radius: 20px; color: white; font-size: 0.9rem; outline: none;
+    }
+    .chatbot-input:focus { border-color: var(--accent-primary); }
+    .chatbot-send {
+      background: var(--accent-primary); color: white; border: none;
+      width: 40px; height: 40px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+    }
+    .chatbot-send:hover { background: var(--accent-secondary); }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .content-grid { grid-template-columns: 1fr; }
@@ -299,6 +364,23 @@
     </div>
   </main>
 
+  <!-- Chatbot UI -->
+  <button class="chatbot-trigger" id="chatbotTrigger" title="Tanya AI tentang Project">🤖</button>
+  
+  <div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-header">
+      <h4>Insight Assistant AI</h4>
+      <button class="chatbot-close" id="chatbotClose">&times;</button>
+    </div>
+    <div class="chatbot-body" id="chatbotMessages">
+      <div class="chat-bubble assistant">Memuat riwayat obrolan...</div>
+    </div>
+    <div class="chatbot-footer">
+      <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Tanya sesuatu tentang proyek ini..." autocomplete="off">
+      <button class="chatbot-send" id="chatbotSend">➤</button>
+    </div>
+  </div>
+
   <script>
     // 1. Get Project ID from URL Parameter OR LocalStorage
     const urlParams = new URLSearchParams(window.location.search);
@@ -307,6 +389,11 @@
     if (!projectId) {
       alert("No Project ID provided. Returning to dashboard.");
       window.location.href = 'index.html';
+    }
+
+    // Authentication Check First
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
     }
 
     const API_BASE = 'http://localhost:3000/api/projects';
@@ -517,6 +604,122 @@
         btn.innerText = 'Run Standard Valuation';
         btn.disabled = false;
       }
+    });
+
+    // ==========================================
+    // CHATBOT LOGIC
+    // ==========================================
+    const chatbotTrigger = document.getElementById('chatbotTrigger');
+    const chatbotWindow = document.getElementById('chatbotWindow');
+    const chatbotClose = document.getElementById('chatbotClose');
+    const chatbotInput = document.getElementById('chatbotInput');
+    const chatbotSend = document.getElementById('chatbotSend');
+    const chatbotMessages = document.getElementById('chatbotMessages');
+    
+    function getAuthHeaders() {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return headers;
+    }
+
+    chatbotTrigger.addEventListener('click', () => {
+      chatbotWindow.classList.add('open');
+      if(chatbotMessages.children.length <= 1) {
+         fetchChatHistory();
+      }
+    });
+
+    chatbotClose.addEventListener('click', () => {
+      chatbotWindow.classList.remove('open');
+    });
+
+    function appendMessage(role, text) {
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${role}`;
+      bubble.innerText = text;
+      chatbotMessages.appendChild(bubble);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    async function fetchChatHistory() {
+      // Show loading indicator early
+      chatbotMessages.innerHTML = '';
+      const loadingHistory = document.createElement('div');
+      loadingHistory.className = 'chat-bubble assistant';
+      loadingHistory.innerText = 'Memuat riwayat obrolan...';
+      chatbotMessages.appendChild(loadingHistory);
+
+      try {
+        const response = await fetch(`${API_BASE}/${projectId}/chatbot`, {
+           headers: getAuthHeaders()
+        });
+        const result = await response.json();
+        
+        chatbotMessages.innerHTML = ''; // clear loading text
+
+        if (response.ok && result.data && result.data.length > 0) {
+          result.data.forEach(msg => {
+             // System prompt shouldn't be rendered directly
+             if (msg.role !== 'system') {
+               appendMessage(msg.role, msg.content);
+             }
+          });
+        } else {
+          appendMessage('assistant', 'Halo, saya AI konsultan Anda. Ada yang ingin dipertanyakan seputar perhitungan atau skenario di proyek ini?');
+        }
+      } catch (err) {
+        chatbotMessages.innerHTML = '<div class="chat-bubble assistant" style="color: var(--status-error);">Gagal memuat history dari server. Pastikan Backend API sudah menyala dan anda memiliki token jika diwajibkan.</div>';
+      }
+    }
+
+    async function sendChatMessage() {
+      const text = chatbotInput.value.trim();
+      if (!text) return;
+      
+      appendMessage('user', text);
+      chatbotInput.value = '';
+      chatbotSend.disabled = true;
+
+      // Loading bubble
+      const loadingBubble = document.createElement('div');
+      loadingBubble.className = 'chat-bubble assistant';
+      loadingBubble.innerText = 'Sedang menganalisa...';
+      loadingBubble.id = 'loadingBubble';
+      chatbotMessages.appendChild(loadingBubble);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+      try {
+        const response = await fetch(`${API_BASE}/${projectId}/chatbot`, {
+           method: 'POST',
+           headers: getAuthHeaders(),
+           body: JSON.stringify({ message: text })
+        });
+        const result = await response.json();
+        
+        const loader = document.getElementById('loadingBubble');
+        if (loader) loader.remove();
+
+        if (response.ok) {
+           appendMessage('assistant', result.data.text);
+        } else {
+           // Handle common errors like 401 Unauthorized here
+           const errMsg = result.message || 'Gagal mengirim pesan';
+           appendMessage('assistant', `Error (${response.status}): ${errMsg}`);
+        }
+      } catch (err) {
+         const loader = document.getElementById('loadingBubble');
+         if (loader) loader.remove();
+         appendMessage('assistant', 'Error: Jaringan terputus, pastikan server menyala.');
+      }
+      
+      chatbotSend.disabled = false;
+      chatbotInput.focus();
+    }
+
+    chatbotSend.addEventListener('click', sendChatMessage);
+    chatbotInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendChatMessage();
     });
 
     // Start

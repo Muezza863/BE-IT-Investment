@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Middleware tambahan untuk meminimalisir error dari req Postman (form-data)
 app.use(upload.none());
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(path.join(__dirname, "..", "FE-Test")));
 
 // 🔐 Passport (WAJIB untuk Google Auth)
 app.use(passport.initialize());
@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/consul", (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "public", "consul.html"));
+    res.sendFile(path.join(__dirname, "..", "FE-Test", "consul.html"));
 });
 
 app.get("/test", (req, res) => {

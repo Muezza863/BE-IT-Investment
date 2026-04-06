@@ -615,12 +615,31 @@
   </div>
 
   <script>
+    // Authentication Check First
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
     const API_URL = 'http://localhost:3000/api/projects';
     const projectGrid = document.getElementById('projectGrid');
     const addModal = document.getElementById('addModal');
     const createProjectForm = document.getElementById('createProjectForm');
     const formError = document.getElementById('formError');
     const submitBtn = document.getElementById('submitBtn');
+
+    function getAuthHeaders() {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return headers;
+    }
+
+    function handleAuthError(response) {
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+    }
 
     // Simple script to close modal when clicking outside of it
     addModal.addEventListener('click', function(e) {
@@ -641,7 +660,8 @@
 
     async function fetchProjects() {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_URL, { headers: getAuthHeaders() });
+        handleAuthError(response);
         if (!response.ok) throw new Error('API response error');
         
         const resData = await response.json();
@@ -717,11 +737,10 @@
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
+        handleAuthError(response);
 
         const result = await response.json();
 

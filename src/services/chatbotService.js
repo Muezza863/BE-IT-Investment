@@ -10,9 +10,14 @@ const buildChatbotPayload = ({ message, history = [] }) => {
       return;
     }
 
+    // OpenAI Responses API requires different content types per role:
+    // - user/system → "input_text"
+    // - assistant   → "output_text"
+    const contentType = item.role === "assistant" ? "output_text" : "input_text";
+
     conversation.push({
       role: item.role,
-      content: [{ type: "input_text", text: item.content }],
+      content: [{ type: contentType, text: item.content }],
     });
   });
 

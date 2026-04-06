@@ -10,6 +10,8 @@ import {
   getProjects,
   updateDraftProject,
   chatWithBot,
+  getProjectChatHistory,
+  sendProjectChatMessage,
   getConsultants,
   getConsultantById,
   createConsultant,
@@ -44,5 +46,8 @@ router.post("/projects", authentication, authorizeRoles("user"), createProject);
 router.get("/projects/:id", authentication, getProjectDraft);
 router.put("/projects/:id", authentication, protectProject, updateDraftProject);
 router.delete("/projects/:id", authentication, protectProject, deleteProject);
+
+router.get("/projects/:id/chatbot", authentication, protectProject, getProjectChatHistory);
+router.post("/projects/:id/chatbot", authentication, protectProject, sendProjectChatMessage);
 
 export default router;
