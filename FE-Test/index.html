@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Investment Portfolio - Projects</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f111a;
+      --bg-secondary: #1a1d2d;
+      --surface-glass: rgba(26, 29, 45, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --status-drafting: #f59e0b;
+      --status-waiting: #3b82f6;
+      --status-calculated: #10b981;
+      --status-error: #ef4444;
+
+      --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.2);
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid var(--glass-border);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-glow);
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      list-style: none;
+    }
+
+    .nav-item {
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+      transform: translateX(5px);
+    }
+
+    .nav-item.active {
+      background: var(--accent-gradient);
+      color: white;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .nav-item.active:hover {
+      transform: none;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      padding: 2rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .header-title h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .header-title p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .header-profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .profile-img {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 2px solid var(--accent-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Stats Section */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent-gradient);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-title {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+
+    /* Projects Section */
+    .projects-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Project Cards */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: var(--surface-glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: var(--transition);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: var(--shadow-card), var(--shadow-glow);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .project-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .project-industry {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .status-badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .status-drafting {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--status-drafting);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .status-waiting {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--status-waiting);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .status-calculated {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--status-calculated);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .tags-container {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      border: 1px solid var(--glass-border);
+    }
+
+    .project-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--glass-border);
+      margin-top: auto;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-val {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: white;
+    }
+
+    .mcfarlan-quadrant {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--accent-primary);
+      font-weight: 500;
+      background: rgba(99, 102, 241, 0.1);
+      padding: 0.35rem 0.75rem;
+      border-radius: 12px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      box-shadow: 0 0 10px var(--accent-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar { width: 80px; padding: 1.5rem 1rem; }
+      .logo-text, .nav-item span { display: none; }
+      .nav-item { justify-content: center; padding: 1rem; }
+      .logo-container { justify-content: center; }
+      .main-content { margin-left: 80px; }
+    }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        padding: 1rem;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+      }
+      .main-content { margin-left: 0; padding: 1rem; }
+      .nav-links { flex-direction: row; margin-left: auto; align-items: center; }
+      .logo-container { margin-bottom: 0; }
+      .project-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Modal Overlay (Add Project) */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: var(--bg-primary);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+      box-shadow: var(--shadow-card);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--glass-border);
+      color: white;
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-container">
+      <div class="logo-icon">IT</div>
+      <div class="logo-text">Investasi</div>
+    </div>
+    <ul class="nav-links">
+      <li class="nav-item">
+        <i>📊</i>
+        <span>Dashboard</span>
+      </li>
+      <li class="nav-item active">
+        <i>📁</i>
+        <span>Projects</span>
+      </li>
+      <li class="nav-item">
+        <i>⚙️</i>
+        <span>Settings</span>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-title">
+        <h1>Projects Portfolio</h1>
+        <p>Manage and simulate your IT investment projects</p>
+      </div>
+      <div class="header-profile">
+        <div class="profile-img">JD</div>
+      </div>
+    </header>
+
+    <!-- Stats Summary -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-title">Total Projects</span>
+        <span class="stat-value">12</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Calculated</span>
+        <span class="stat-value">8</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Waiting Input</span>
+        <span class="stat-value">3</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Drafting</span>
+        <span class="stat-value">1</span>
+      </div>
+    </section>
+
+    <!-- Projects Header & Action -->
+    <section class="projects-section">
+      <div class="projects-header">
+        <h2>Recent Projects</h2>
+        <button class="btn-primary" onclick="document.getElementById('addModal').classList.add('active')">
+          + New Project
+        </button>
+      </div>
+
+      <!-- Project Cards Grid -->
+      <div class="project-grid" id="projectGrid">
+        <p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Connecting to Backend API on localhost:3000...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add Project Modal (For UI Testing) -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Project</h2>
+        <button class="close-btn" onclick="document.getElementById('addModal').classList.remove('active')">&times;</button>
+      </div>
+      <form id="createProjectForm">
+        <div class="form-group">
+          <label>Industry</label>
+          <select id="inputIndustry" class="form-control" required>
+            <option value="Finance">Finance</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Retail">Retail</option>
+            <option value="Healthcare">Healthcare</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;">
+            <label>Employee Count</label>
+            <input type="number" id="inputEmployeeCount" class="form-control" placeholder="e.g. 150" required>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Location</label>
+            <input type="text" id="inputLocation" class="form-control" placeholder="City" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Strategic Plan Focus</label>
+          <input type="text" id="inputPlan" class="form-control" placeholder="e.g. Digital Transformation 2026" required>
+        </div>
+
+        <div id="formError" style="color: var(--status-error); margin-bottom: 1rem; font-size: 0.85rem;"></div>
+
+        <button type="submit" id="submitBtn" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;">Start AI Drafting</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api/projects';
+    const projectGrid = document.getElementById('projectGrid');
+    const addModal = document.getElementById('addModal');
+    const createProjectForm = document.getElementById('createProjectForm');
+    const formError = document.getElementById('formError');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Simple script to close modal when clicking outside of it
+    addModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('active');
+        formError.innerText = '';
+      }
+    });
+
+    function getStatusClass(status) {
+      if (!status) return 'status-drafting';
+      const s = String(status).toUpperCase();
+      if (s === 'DRAFTING') return 'status-drafting';
+      if (s === 'WAITING_USER_INPUT') return 'status-waiting';
+      if (s === 'CALCULATED') return 'status-calculated';
+      return 'status-error';
+    }
+
+    async function fetchProjects() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('API response error');
+        
+        const resData = await response.json();
+        // The backend returns an array of formatted projects in resData.data
+        const projects = resData.data || [];
+
+        projectGrid.innerHTML = ''; // Clear loading text
+
+        if (projects.length === 0) {
+          projectGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">No projects found in the database.</p>';
+          return;
+        }
+
+        projects.forEach(project => {
+          // Robust ID extraction mapping for Mongo defaults
+          const pid = String(project._id || project.id || 'UnknownID');
+
+          const cardHTML = `
+            <div class="project-card">
+              <div class="project-header">
+                <div>
+                  <h3 class="project-title" style="font-size: 1.1rem; color: var(--accent-gradient);">Project ID</h3>
+                  <p class="project-industry" style="font-size: 0.95rem; color: #fff;">${pid.slice(-8).toUpperCase()}</p>
+                </div>
+                <span class="status-badge ${getStatusClass(project.status)}" style="text-transform: uppercase;">${(project.status || 'DRAFTING').replace(/_/g, ' ')}</span>
+              </div>
+              
+              <div class="tags-container" style="margin-top: 0.5rem;">
+                <span class="tag">${project.industry}</span>
+              </div>
+
+              <div class="project-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Created At</span>
+                  <span class="meta-val">${project.date || '-'}</span>
+                </div>
+                <button class="btn-primary" onclick="localStorage.setItem('currentProjectId', '${pid}'); window.location.href='project-detail.html?id=${pid}'" style="padding: 0.4rem 1rem; font-size: 0.8rem;">View Detail</button>
+              </div>
+            </div>
+          `;
+          projectGrid.innerHTML += cardHTML;
+        });
+
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        projectGrid.innerHTML = '<p style="text-align: center; color: var(--status-error); grid-column: 1 / -1;">Failed to load projects from Backend API (http://localhost:3000).</p>';
+      }
+    }
+
+    // Handle Form Submission
+    createProjectForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formError.innerText = '';
+      submitBtn.innerText = 'Creating...';
+      submitBtn.disabled = true;
+
+      // Create payload adhering strictly to the backend validation logic
+      const payload = {
+        industry: document.getElementById('inputIndustry').value,
+        employeeCount: Number(document.getElementById('inputEmployeeCount').value),
+        plan: document.getElementById('inputPlan').value,
+        location: document.getElementById('inputLocation').value,
+        
+        // Mocking domain variables to pass backend logic since they are missing from simple UI forms
+        businessDomain: { SM: 5, CA: 4, MI: 3, CR: 5, OR: 4 },
+        technologyDomain: { SA: 3, DU: 5, TU: 4, IR: 2 },
+        currentIT: [4, 5, 3, 4],
+        futureIT: [5, 5, 5, 5],
+        DM: [3, 4, 3, 5],
+        RE: [4, 4, 4, 4]
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'success') {
+          addModal.classList.remove('active');
+          createProjectForm.reset();
+          fetchProjects(); // Refresh the grid
+        } else {
+          formError.innerText = result.message || 'Validation error from backend.';
+        }
+      } catch (err) {
+        formError.innerText = 'Network error: Make sure backend is running.';
+      } finally {
+        submitBtn.innerText = 'Start AI Drafting';
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Load actual projects from API on startup
+    fetchProjects();
+  </script>
+</body>
+</html>
