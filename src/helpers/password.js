@@ -7,6 +7,10 @@ export const hash = (password) => {
 };
 
 export const compare = (password, hashedPassword) => {
+  if (!password || !hashedPassword) {
+    return false;
+  }
+
   const isMatch = bcrypt.compareSync(password, hashedPassword);
   return isMatch;
 };
