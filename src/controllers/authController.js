@@ -3,14 +3,19 @@ import { compare } from "../helpers/password.js";
 import { generateToken } from "../helpers/token.js";
 import transporter from "../helpers/mailer.js";
 
+const deriveNameFromEmail = (email) => email?.split("@")[0] || "User";
+
 // =======================
 // 🔐 REGISTER
 // =======================
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
-    const { name, email, password, confirmPassword, businessName, role } = req.body;
+    const { name, nama, email, password, confirmPassword, businessName, role } = req.body;
+    
+    // Support both name and nama for backward compatibility
+    const finalName = name || nama;
 
-    if (!name || !email || !password) {
+    if (!finalName || !email || !password) {
       return res.status(400).json({ success: false, message: "Name, email, and password are required" });
     }
 
@@ -24,32 +29,76 @@ export const register = async (req, res) => {
     }
 
     const user = await User.create({
-      name,
+      name: finalName,
       email,
       password,
       businessName,
-      role,
+      role: role || "user",
     });
 
     const token = generateToken({
       id: user._id,
       email: user.email,
       name: user.name,
+      role: user.role,
     });
 
     res.status(201).json({
       success: true,
       message: "Registration successful",
       token,
-      user: {
+      data: {
         id: user._id,
         name: user.name,
         email: user.email,
         businessName: user.businessName,
         role: user.role,
       },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        businessName: user.businessName,
+        role: user.role,
+      }
     });
   } catch (error) {
+    if (next) return next(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const createAdmin = async (req, res, next) => {
+  try {
+    const { name, nama, email, password } = req.body;
+    const finalName = name || nama;
+
+    if (!finalName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ success: false, message: "Email is already registered" });
+    }
+
+    const admin = await User.create({ name: finalName, email, password, role: "admin" });
+
+    res.status(201).json({
+      success: true,
+      message: "Admin created successfully",
+      data: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+      },
+    });
+  } catch (error) {
+    if (next) return next(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -57,7 +106,7 @@ export const register = async (req, res) => {
 // =======================
 // 🔐 LOGIN
 // =======================
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -66,21 +115,44 @@ export const login = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
-    const match = await compare(password, user.password);
+    const match = compare(password, user.password);
     if (!match) {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
+    let shouldSave = false;
+
+    if (!user.role) {
+      user.role = "user";
+      shouldSave = true;
+    }
+
+    if (!user.name) {
+      user.name = deriveNameFromEmail(user.email);
+      shouldSave = true;
+    }
+
+    if (shouldSave) {
+      await user.save();
+    }
+
     const token = generateToken({
       id: user._id,
-      email: user.email,
       name: user.name,
+      email: user.email,
+      role: user.role,
     });
 
     res.json({
       success: true,
       message: "Login successful",
       token,
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
       user: {
         id: user._id,
         name: user.name,
@@ -90,6 +162,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
+    if (next) return next(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

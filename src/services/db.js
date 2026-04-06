@@ -6,10 +6,14 @@ setServers(["1.1.1.1","8.8.8.8"]);
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log("Connected to MongoDB");
-    })
-    .catch((error) => {
-        console.log(error);
-    });
+const dbConnection = mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.log(error);
+    throw error;
+  });
+
+export default dbConnection;

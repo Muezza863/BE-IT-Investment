@@ -8,61 +8,41 @@ import {
   getProjectDraft,
   deleteProject,
   getProjects,
-  updateDraftProject
+  updateDraftProject,
+  chatWithBot,
+  getConsultants,
+  getConsultantById,
+  createConsultant,
+  updateConsultant,
+  deleteConsultant,
+  getAdminDashboard,
 } from "../controllers/index.js";
-
-// =======================
-// 🔐 AUTH ROUTES
-// =======================
 import authRoutes from "./authRoutes.js";
 
 // =======================
 // 🔐 MIDDLEWARE
 // =======================
-import {
-  authentication,
-  authorization
-} from "../middlewares/authMiddleware.js";
+import { authentication, authorizeRoles } from "../middlewares/auth.js";
+import { authorization as protectProject } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
-// =======================
-// 🔐 AUTH ROUTES (FIXED)
-// =======================
-router.use("/auth", authRoutes); // ✅ FIX DI SINI
+router.use("/auth", authRoutes);
 
-// =======================
-// 📦 PROJECT ROUTES (PROTECTED)
-// =======================
+router.post("/chatbot", chatWithBot);
+
+router.get("/consultants", getConsultants);
+router.get("/consultants/:id", getConsultantById);
+router.post("/consultants", authentication, authorizeRoles("admin"), createConsultant);
+router.put("/consultants/:id", authentication, authorizeRoles("admin"), updateConsultant);
+router.delete("/consultants/:id", authentication, authorizeRoles("admin"), deleteConsultant);
+
+router.get("/admin/dashboard", authentication, authorizeRoles("admin"), getAdminDashboard);
 
 router.get("/projects", authentication, getProjects);
-
-router.post("/projects", authentication, createProject);
-
+router.post("/projects", authentication, authorizeRoles("user"), createProject);
 router.get("/projects/:id", authentication, getProjectDraft);
-
-router.put(
-  "/projects/:id",
-  authentication,
-  authorization,
-  updateDraftProject
-);
-
-router.delete(
-  "/projects/:id",
-  authentication,
-  authorization,
-  deleteProject
-);
-
-// =======================
-// 🧪 DEBUG ROUTE
-// =======================
-router.get("/me", authentication, (req, res) => {
-  res.json({
-    success: true,
-    user: req.user,
-  });
-});
+router.put("/projects/:id", authentication, protectProject, updateDraftProject);
+router.delete("/projects/:id", authentication, protectProject, deleteProject);
 
 export default router;
