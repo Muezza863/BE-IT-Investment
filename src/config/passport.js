@@ -2,7 +2,11 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import dotenv from "dotenv";
 import User from "../models/User.js"; // ✅ FIX: pakai default import
+<<<<<<< HEAD
 import { generateToken } from "../helpers/token.js";
+=======
+import { generateToken } from "../utils/jwt.js";
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
 
 dotenv.config();
 
@@ -28,7 +32,11 @@ passport.use(
         const avatar = profile.photos?.[0]?.value || null;
 
         if (!email) {
+<<<<<<< HEAD
           return done(new Error("Email not available from Google"), null);
+=======
+          return done(new Error("Email tidak tersedia dari Google"), null);
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
         }
 
         // =====================================

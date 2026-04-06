@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 // 🔐 GENERATE ACCESS TOKEN
 //
 export const generateToken = (payload) => {
+<<<<<<< HEAD
+=======
+  console.log("nx");
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
   try {
     return jwt.sign(
       {
