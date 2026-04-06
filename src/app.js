@@ -1,4 +1,11 @@
 import express from "express";
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+import mongoose from "mongoose";
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
 import dotenv from "dotenv";
 import cors from "cors";
 import passport from "./config/passport.js";
@@ -45,6 +52,13 @@ app.use("/api", routes);
 // =======================
 app.use((err, req, res, next) => {
   console.error(err);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+console.log("Global error handler triggered");
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Internal Server Error",

@@ -35,13 +35,29 @@ const createProject = async (req, res) => {
     const defaultDescription = `IT solution implementation for ${scale} scale in ${location} area.`;
 
     const newProject = new Project({
+<<<<<<< HEAD
       userId: req.user.id,
+=======
+<<<<<<< HEAD
+      userId: req.user.id,
+=======
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
       projectName: defaultProjectName,
       industry,
       scale,
       plan,
       location,
+<<<<<<< HEAD
       status: 'DRAFTING',
+=======
+<<<<<<< HEAD
+      status: 'DRAFTING',
+=======
+      status: 'DRAFTING', // Setup awal, menunggu proses AI
+      // llmBaseDraft dibiarkan kosong
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     });
 
     await newProject.save();
@@ -107,6 +123,10 @@ const getProjectDraft = async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     if (project.userId.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         status: 'error',
@@ -114,6 +134,11 @@ const getProjectDraft = async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     res.status(200).json({
       status: 'success',
       message: 'Project draft successfully retrieved.',
@@ -191,7 +216,17 @@ const formatDateStr = (dateInput) => {
 // Fungsi untuk mendapatkan daftar project
 const getProjects = async (req, res) => {
   try {
+<<<<<<< HEAD
     const projects = await Project.find({ userId: req.user.id }, '_id industry status createdAt').sort({ createdAt: -1 });
+=======
+<<<<<<< HEAD
+    const projects = await Project.find({ userId: req.user.id }, '_id industry status createdAt').sort({ createdAt: -1 });
+=======
+    // Proyeksi (projection) field _id, industry, status, dan createdAt agar ringan
+    // Diurutkan berdasarkan pembuatan terbaru ke terlama
+    const projects = await Project.find({}, '_id industry status createdAt').sort({ createdAt: -1 });
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
 
     const formattedProjects = projects.map(project => ({
       id: project._id,

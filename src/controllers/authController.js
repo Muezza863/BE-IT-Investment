@@ -1,6 +1,10 @@
 import { User } from "../models/index.js";
 import { compare } from "../helpers/password.js";
 import { generateToken } from "../helpers/token.js";
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
 import transporter from "../helpers/mailer.js";
 
 export const register = async (req, res) => {
@@ -20,28 +24,83 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email is already registered" });
     }
 
+<<<<<<< HEAD
+=======
+=======
+
+// =======================
+// 🔐 REGISTER
+// =======================
+export const register = async (req, res) => {
+  console.log("Register controller triggered");
+  try {
+    const { name, email, password } = req.body;
+
+    // 🔍 cek user sudah ada
+    console.log("Checking if user already exists with email:", email);
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "Email sudah terdaftar",
+      });
+    }
+
+    // 🆕 create user
+    console.log("Creating new user with email:", email);
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     const user = await User.create({
       name,
       email,
       password,
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
       businessName,
       role,
     });
 
+<<<<<<< HEAD
+=======
+=======
+    });
+console.log("sd");
+    // 🔑 generate token (sinkron dengan middleware)
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     const token = generateToken({
       id: user._id,
       email: user.email,
       name: user.name,
     });
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
 
     res.status(201).json({
       success: true,
       message: "Registration successful",
+<<<<<<< HEAD
+=======
+=======
+console.log("rx");
+    res.status(201).json({
+      success: true,
+      message: "Register berhasil",
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
         businessName: user.businessName,
         role: user.role,
       },
@@ -51,10 +110,33 @@ export const register = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
+=======
+=======
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+  
+};
+
+// =======================
+// 🔐 LOGIN
+// =======================
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
@@ -65,6 +147,30 @@ export const login = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
+<<<<<<< HEAD
+=======
+=======
+    // 🔍 cari user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Email atau password salah",
+      });
+    }
+
+    // 🔐 cek password
+    const match = compare(password, user.password);
+    if (!match) {
+      return res.status(401).json({
+        success: false,
+        message: "Email atau password salah",
+      });
+    }
+
+    // 🔑 generate token (HARUS sama dengan Google Auth)
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     const token = generateToken({
       id: user._id,
       email: user.email,
@@ -73,7 +179,15 @@ export const login = async (req, res) => {
 
     res.json({
       success: true,
+<<<<<<< HEAD
       message: "Login successful",
+=======
+<<<<<<< HEAD
+      message: "Login successful",
+=======
+      message: "Login berhasil",
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
       token,
       user: {
         id: user._id,
@@ -82,6 +196,10 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -230,3 +348,14 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+<<<<<<< HEAD
+=======
+=======
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe

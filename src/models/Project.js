@@ -28,7 +28,14 @@ const simulationSchema = new mongoose.Schema({
 });
 
 const projectSchema = new mongoose.Schema({
+<<<<<<< HEAD
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+=======
+<<<<<<< HEAD
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+=======
+>>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+>>>>>>> aef6af45c6e9185c63419add24d927391a488abe
   projectName: { type: String, required: true },
   industry: { type: String, required: true },
   scale: { type: String, required: true },
