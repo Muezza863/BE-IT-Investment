@@ -281,21 +281,48 @@ export const getProfile = async (req, res) => {
   }
 };
 
+
 export const updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName, businessName, role, avatar } = req.body;
+    // avatar dihapus dari req.body karena file gambar akan ada di req.file
+    const { firstName, lastName, businessName, role } = req.body;
 
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    // 1. Logika Upload Avatar ke Backblaze B2
+    if (req.file) {
+      const file = req.file;
+      // Buat nama file yang unik agar tidak menimpa file lain
+      const fileName = `avatars/user-${user._id}-${Date.now()}-${file.originalname}`;
+
+      const uploadCommand = new PutObjectCommand({
+        Bucket: process.env.B2_BUCKET_NAME,
+        Key: fileName,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      });
+
+      // Kirim file ke Backblaze
+      await s3Client.send(uploadCommand);
+
+      // Asumsi bucket Anda disetting ke "Public". 
+      // Format URL S3 Compatible Backblaze: endpoint/bucketName/fileName
+      const avatarUrl = `${process.env.B2_ENDPOINT}/${process.env.B2_BUCKET_NAME}/${fileName}`;
+      
+      // Update field avatar user dengan URL dari Backblaze
+      user.avatar = avatarUrl;
+    }
+
+    // 2. Update field teks lainnya
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
     if (businessName !== undefined) user.businessName = businessName;
     if (role !== undefined) user.role = role;
-    if (avatar !== undefined) user.avatar = avatar;
 
+    // 3. Update nama lengkap jika firstName atau lastName berubah
     if (firstName || lastName) {
       user.name = `${firstName ?? user.firstName ?? ""} ${lastName ?? user.lastName ?? ""}`.trim();
     }
@@ -308,6 +335,7 @@ export const updateProfile = async (req, res) => {
 
     res.json({ success: true, message: "Profile updated successfully", data: updated });
   } catch (error) {
+    console.error("Error updating profile:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
