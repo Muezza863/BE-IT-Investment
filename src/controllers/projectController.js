@@ -15,11 +15,8 @@ const getBusinessScale = (employeeCount) => {
 
 const createProject = async (req, res) => {
   try {
-    // Menghilangkan projectName dan description dari input user
-    // Menambahkan employeeCount untuk menentukan business scale
     const { industry, employeeCount, plan, location } = req.body;
 
-    // 1. Validasi input dasar
     if (!industry || !employeeCount || !plan || !location) {
       return res.status(400).json({ 
         status: 'error', 
@@ -27,34 +24,22 @@ const createProject = async (req, res) => {
       });
     }
 
-    // 2. Terjemahkan jumlah karyawan ke kelompok skala bisnis
     const scale = getBusinessScale(employeeCount);
-
-    // 3. Simpan proyek awal ke Database (MongoDB) dengan status DRAFTING
     const defaultProjectName = `IT Project - ${industry}`;
     const defaultDescription = `IT solution implementation for ${scale} scale in ${location} area.`;
 
     const newProject = new Project({
-<<<<<<< HEAD
       userId: req.user.id,
-=======
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
       projectName: defaultProjectName,
       industry,
       scale,
       plan,
       location,
-<<<<<<< HEAD
-      status: 'DRAFTING',
-=======
       status: 'DRAFTING', // Setup awal, menunggu proses AI
-      // llmBaseDraft dibiarkan kosong
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
     });
 
     await newProject.save();
 
-    // 4. Kirim respons HTTP ke frontend (tidak perlu menunggu AI)
     res.status(201).json({
       status: 'success',
       message: 'Project data successfully submitted. AI is currently drafting.',
@@ -63,7 +48,6 @@ const createProject = async (req, res) => {
       }
     });
 
-    // 5. Jalankan Service LLM (Gemini) di background
     console.log(`[Project ${newProject._id}] Requesting estimate from Gemini in background...`);
     
     generateProjectDraft({ 
@@ -74,13 +58,11 @@ const createProject = async (req, res) => {
       location, 
       description: defaultDescription 
     }).then(async (aiDraft) => {
-      // 6. Jika AI berhasil me-return draft, update database
       newProject.llmBaseDraft = aiDraft;
-      newProject.status = 'WAITING_USER_INPUT'; // Berubah status karena AI sudah selesai
+      newProject.status = 'WAITING_USER_INPUT';
       await newProject.save();
       console.log(`[Project ${newProject._id}] Background AI drafting finished successfully.`);
     }).catch(async (err) => {
-      // Menangkap error jika proses background gagal, lalu update status menjadi ERROR
       console.error(`[Project ${newProject._id}] Error in background AI drafting:`, err);
       newProject.status = 'ERROR';
       try {
@@ -100,8 +82,6 @@ const createProject = async (req, res) => {
   }
 };
 
-
-// Fungsi untuk mendapatkan data hasil draf AI dari database
 const getProjectDraft = async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,7 +95,6 @@ const getProjectDraft = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
     if (project.userId.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         status: 'error',
@@ -123,8 +102,6 @@ const getProjectDraft = async (req, res) => {
       });
     }
 
-=======
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
     res.status(200).json({
       status: 'success',
       message: 'Project draft successfully retrieved.',
@@ -146,7 +123,6 @@ const getProjectDraft = async (req, res) => {
   }
 };
 
-// Fungsi untuk menghapus project, hanya berlaku jika statusnya 'ERROR'
 const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -183,7 +159,6 @@ const deleteProject = async (req, res) => {
   }
 };
 
-// Fungsi untuk memformat tanggal menjadi 'Sat,20 Apr 2020'
 const formatDateStr = (dateInput) => {
   const d = new Date(dateInput);
   if (isNaN(d.getTime())) return '-';
@@ -192,29 +167,22 @@ const formatDateStr = (dateInput) => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   
   const dayName = days[d.getDay()];
-  const day = d.getDate(); // Tidak dipadding 0 di depan untuk single digit, karena contoh Sat,20 -> 20. Jika ingin padding, tambah .toString().padStart(2, '0')
+  const day = d.getDate();
   const month = months[d.getMonth()];
   const year = d.getFullYear();
   
   return `${dayName},${day} ${month} ${year}`;
 };
 
-// Fungsi untuk mendapatkan daftar project
 const getProjects = async (req, res) => {
   try {
-<<<<<<< HEAD
     const projects = await Project.find({ userId: req.user.id }, '_id industry status createdAt').sort({ createdAt: -1 });
-=======
-    // Proyeksi (projection) field _id, industry, status, dan createdAt agar ringan
-    // Diurutkan berdasarkan pembuatan terbaru ke terlama
-    const projects = await Project.find({}, '_id industry status createdAt').sort({ createdAt: -1 });
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
 
     const formattedProjects = projects.map(project => ({
       id: project._id,
       industry: project.industry,
       status: project.status,
-      date: formatDateStr(project.createdAt) // Memformat tanggal sesuai contoh: Sat,20 Apr 2020
+      date: formatDateStr(project.createdAt)
     }));
 
     res.status(200).json({
@@ -232,15 +200,14 @@ const getProjects = async (req, res) => {
   }
 };
 
-// Fungsi untuk memperbarui (edit) data project atau draf LLM
 const updateDraftProject = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
 
     const updatedProject = await Project.findByIdAndUpdate(id, updateData, {
-      new: true, // Mengembalikan dokumen setelah diupdate
-      runValidators: true // Memastikan validasi model tetap berjalan
+      new: true,
+      runValidators: true
     });
 
     if (!updatedProject) {

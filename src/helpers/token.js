@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 
-// 
+// =======================
 // 🔐 GENERATE ACCESS TOKEN
-//
+// =======================
 export const generateToken = (payload) => {
-  console.log("nx");
   try {
     return jwt.sign(
       {
@@ -14,8 +13,8 @@ export const generateToken = (payload) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1d", // bisa ubah: 1h, 7d, dll
-        issuer: "your-app", // optional tapi recommended
+        expiresIn: "1d",
+        issuer: "your-app",
       }
     );
   } catch (error) {

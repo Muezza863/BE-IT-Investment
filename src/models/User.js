@@ -3,6 +3,21 @@ import { hash } from "../helpers/password.js";
 
 const userSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+    },
+    firstName: {
+      type: String,
+    },
+    lastName: {
+      type: String,
+    },
+    businessName: {
+      type: String,
+    },
+    role: {
+      type: String,
+    },
     email: {
       type: String,
       required: true,
@@ -14,24 +29,25 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
+    avatar: {
+      type: String,
+    },
+    resetOtp: {
+      type: String,
+    },
+    resetOtpExpiry: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
 
-// =======================
-// 🔐 HASH PASSWORD (FIXED)
-// =======================
 userSchema.pre("save", async function () {
   try {
-    // kalau password tidak diubah → skip
     if (!this.isModified("password")) return;
-
-    console.log("🔥 hashing password...");
-
     this.password = await hash(this.password);
-
   } catch (error) {
-    throw error; // biar ke-handle oleh controller
+    throw error;
   }
 });
 

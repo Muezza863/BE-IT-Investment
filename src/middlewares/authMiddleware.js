@@ -1,17 +1,10 @@
 import { verifyToken } from "../helpers/token.js";
-<<<<<<< HEAD
 import { Project } from "../models/index.js";
-
-export const authentication = (req, res, next) => {
-=======
-import User from "../models/User.js"; // ✅ FIX
 
 // =======================
 // 🔐 AUTHENTICATION (JWT)
 // =======================
 export const authentication = (req, res, next) => {
-  console.log("Authentication middleware triggered");
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
   try {
     const authHeader = req.headers.authorization;
 
@@ -40,15 +33,10 @@ export const authentication = (req, res, next) => {
   }
 };
 
-<<<<<<< HEAD
-export const authorization = async (req, res, next) => {
-=======
 // =======================
 // 🔒 AUTHORIZATION (OWNER)
 // =======================
 export const authorization = async (req, res, next) => {
-  console.log("Authorization middleware triggered");
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
   try {
     const { id } = req.params;
 
@@ -59,7 +47,6 @@ export const authorization = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
     const project = await Project.findById(id);
 
     if (!project) {
@@ -70,18 +57,6 @@ export const authorization = async (req, res, next) => {
     }
 
     if (project.userId.toString() !== req.user.id.toString()) {
-=======
-    const data = await User.findById(id);
-
-    if (!data) {
-      return res.status(404).json({
-        success: false,
-        message: "Data not found",
-      });
-    }
-
-    if (data._id.toString() !== req.user.id.toString()) {
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
       return res.status(403).json({
         success: false,
         message: "Forbidden - You are not allowed",

@@ -1,8 +1,4 @@
 import express from "express";
-<<<<<<< HEAD
-=======
-import mongoose from "mongoose";
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
 import dotenv from "dotenv";
 import cors from "cors";
 import passport from "./config/passport.js";
@@ -30,7 +26,6 @@ app.use(express.urlencoded({ extended: true }));
 // 🔐 Passport (WAJIB untuk Google Auth)
 app.use(passport.initialize());
 
-
 // =======================
 // 📦 ROUTES
 // =======================
@@ -48,11 +43,7 @@ app.use("/api", routes);
 // ❌ GLOBAL ERROR HANDLER (OPSIONAL TAPI DISARANKAN)
 // =======================
 app.use((err, req, res, next) => {
-  console.error(err);
-<<<<<<< HEAD
-=======
-console.log("Global error handler triggered");
->>>>>>> 9c295b348f703b385507ef93c9ef26cea24b4073
+  console.error("Global error handler triggered:", err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
