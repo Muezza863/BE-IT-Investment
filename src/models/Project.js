@@ -18,11 +18,20 @@ const componentsSchema = new mongoose.Schema({
 const simulationSchema = new mongoose.Schema({
   scenarioName: { type: String, default: "Simulasi" }, // cth: "Skenario Optimis", "Skenario Pesimis"
   simulatedData: componentsSchema,
+  simulationSettings: {
+    inflationRate: Number,
+    taxRate: Number,
+    discountRate: Number,
+    years: Number
+  },
   financialResults: {
     npv: Number,
     roi: Number,
-    silkScore: Number,
-    isFeasible: Boolean
+    paybackPeriod: Number,
+    breakEvenYear: Number,
+    breakEvenAnalysisDetail: [mongoose.Schema.Types.Mixed],
+    ieScore: Number,
+    feasibilityStatus: String
   },
   calculatedAt: { type: Date, default: Date.now }
 });

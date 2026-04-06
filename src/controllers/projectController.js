@@ -1,5 +1,5 @@
-import { Project } from '../models/index.js'
-import { generateProjectDraft, determineMcFarlanQuadrant } from '../services/index.js'
+import { Project, Quadrant } from '../models/index.js'
+import { generateProjectDraft, determineMcFarlanQuadrant, calculateProjectValue } from '../services/index.js'
 // Fungsi untuk mengelompokkan skala bisnis berdasarkan jumlah karyawan
 const getBusinessScale = (employeeCount) => {
   const count = parseInt(employeeCount, 10);
@@ -243,27 +243,127 @@ const getProjects = async (req, res) => {
 const updateDraftProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const { 
+      capex = [], 
+      opex = [], 
+      tangibleBenefits = [], 
+      intangibleBenefits = [], 
+      inflationRate = 0.05, 
+      taxRate = 0.11,
+      discountRate = 0.1,
+      years = 3, 
+      scenarioName = "Simulasi" 
+    } = req.body;
 
-    const updatedProject = await Project.findByIdAndUpdate(id, updateData, {
-      new: true, // Mengembalikan dokumen setelah diupdate
-      runValidators: true // Memastikan validasi model tetap berjalan
-    });
-
-    if (!updatedProject) {
+    const project = await Project.findById(id);
+    if (!project) {
       return res.status(404).json({
         status: 'error',
         message: 'Project not found.'
       });
     }
 
+    if (project.simulationHistory.length >= 10) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Maximum simulation limit (10 edits) has been reached. You can no longer edit this project.'
+      });
+    }
+
+
+    // 1. Calculate base totals
+    const initialCost = capex.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
+    const baseOpex = opex.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
+    const baseBenefit = tangibleBenefits.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0) +
+                        intangibleBenefits.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
+
+    // 2. Prepare yearly arrays based on inflation constraints
+    const yearlyBenefits = [];
+    const yearlyCosts = [];
+
+    for (let i = 1; i <= years; i++) {
+        // Calculate inflation factor: (1 + inflationRate)^(i-1)
+        const inflationFactor = Math.pow(1 + Number(inflationRate), i - 1);
+        
+        let currentGrossOpex = baseOpex * inflationFactor;
+        let currentGrossBenefit = baseBenefit * inflationFactor;
+
+        // Apply Tax on Net Benefit (if positive)
+        let tax = 0;
+        if (currentGrossBenefit > currentGrossOpex) {
+            tax = (currentGrossBenefit - currentGrossOpex) * Number(taxRate);
+        }
+
+        // Net Benefit After Tax
+        let netBenefit = currentGrossBenefit - tax;
+
+        yearlyBenefits.push(netBenefit);
+        yearlyCosts.push(currentGrossOpex);
+    }
+
+    // 3. Call Calculation Service
+    const financialData = {
+        initialCost,
+        yearlyBenefits,
+        yearlyCosts,
+        discountRate: Number(discountRate)
+    };
+
+    const surveyScores = {
+        businessDomain: project.businessDomain,
+        technologyDomain: project.technologyDomain
+    };
+
+    const quadrantInfo = await Quadrant.findOne({ name: project.mcfarlan.quadrant });
+
+    const calcResult = calculateProjectValue(financialData, surveyScores, quadrantInfo);
+
+    if (!calcResult.success) {
+         return res.status(400).json({ status: 'error', message: 'Failed to calculate financials' });
+    }
+
+    // 4. Overwrite base draft with new component sets
+    const updatedComponents = { capex, opex, tangibleBenefits, intangibleBenefits };
+    project.llmBaseDraft = updatedComponents;
+
+    // 5. Update Status
+    project.status = 'CALCULATED';
+
+    // 6. Push to Simulation History
+    const simulationEntry = {
+        scenarioName,
+        simulatedData: updatedComponents,
+        simulationSettings: {
+            inflationRate: Number(inflationRate),
+            taxRate: Number(taxRate),
+            discountRate: Number(discountRate),
+            years: Number(years)
+        },
+        financialResults: {
+            npv: calcResult.metrics.npv,
+            roi: calcResult.metrics.roi,
+            paybackPeriod: calcResult.metrics.paybackPeriod,
+            breakEvenYear: calcResult.metrics.breakEvenYear,
+            breakEvenAnalysisDetail: calcResult.breakEvenAnalysisDetail,
+            ieScore: calcResult.metrics.ieScore,
+            feasibilityStatus: calcResult.metrics.feasibilityStatus
+        },
+        calculatedAt: new Date()
+    };
+
+    project.simulationHistory.push(simulationEntry);
+
+    // Simulation history is capped at 10 items via the return error above.
+
+    await project.save();
+
     res.status(200).json({
       status: 'success',
-      message: 'Project successfully updated.',
-      data: updatedProject
+      message: 'Project successfully calculated and updated.',
+      data: project
     });
   } catch (error) {
-    console.error('Error in updateProject:', error);
+    console.error('Error in updateDraftProject:', error);
     res.status(500).json({ 
       status: 'error', 
       message: 'Failed to update project.', 

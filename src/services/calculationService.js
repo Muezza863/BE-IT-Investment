@@ -93,14 +93,65 @@ const calculateBreakEvenPoint = (initialCost, yearlyBenefits, yearlyCosts) => {
 };
 
 /**
+ * Menghitung nilai skor Information Economics (IE) berdasarkan input domain dan data kuadran.
+ */
+const calculateInformationEconomics = (roiPercentage, surveyScores, quadrantFactors) => {
+  if (!surveyScores || !quadrantFactors) return { ieScore: 0, feasibilityStatus: "Data Tidak Lengkap" };
+
+  // 1. Convert ROI Percentage to ROI Score (0 to 5)
+  // ROI percentage from parameter is e.g. 15.5 for 15.5%
+  let roiScore = 0;
+  if (roiPercentage < 1) roiScore = 0;
+  else if (roiPercentage <= 299) roiScore = 1;
+  else if (roiPercentage <= 499) roiScore = 2;
+  else if (roiPercentage <= 699) roiScore = 3;
+  else if (roiPercentage <= 899) roiScore = 4;
+  else roiScore = 5;
+
+  const bDomainScores = surveyScores.businessDomain || {};
+  const tDomainScores = surveyScores.technologyDomain || {};
+
+  const bDomainFactors = quadrantFactors.businessDomain || {};
+  const tDomainFactors = quadrantFactors.technologyDomain || {};
+  const roiFactor = quadrantFactors.ROI || 0;
+
+  // Calculate Weighted Valued
+  const roiWeighted = roiScore * roiFactor;
+  
+  const smWeighted = (bDomainScores.SM || 0) * (bDomainFactors.SM || 0);
+  const caWeighted = (bDomainScores.CA || 0) * (bDomainFactors.CA || 0);
+  const miWeighted = (bDomainScores.MI || 0) * (bDomainFactors.MI || 0);
+  const crWeighted = (bDomainScores.CR || 0) * (bDomainFactors.CR || 0);
+  const orWeighted = (bDomainScores.OR || 0) * (bDomainFactors.OR || 0);
+
+  const saWeighted = (tDomainScores.SA || 0) * (tDomainFactors.SA || 0);
+  const duWeighted = (tDomainScores.DU || 0) * (tDomainFactors.DU || 0);
+  const tuWeighted = (tDomainScores.TU || 0) * (tDomainFactors.TU || 0);
+  const irWeighted = (tDomainScores.IR || 0) * (tDomainFactors.IR || 0);
+
+  const ieScore = roiWeighted + 
+                  smWeighted + caWeighted + miWeighted + crWeighted + orWeighted + 
+                  saWeighted + duWeighted + tuWeighted + irWeighted;
+
+  const finalScore = Number(ieScore.toFixed(2));
+
+  let feasibilityStatus = "";
+  if (finalScore <= -20) feasibilityStatus = "Sangat Tidak Layak";
+  else if (finalScore <= 10) feasibilityStatus = "Tidak Layak";
+  else if (finalScore <= 40) feasibilityStatus = "Cukup";
+  else if (finalScore <= 70) feasibilityStatus = "Layak";
+  else feasibilityStatus = "Sangat Layak";
+
+  return { ieScore: finalScore, feasibilityStatus };
+};
+
+/**
  * Main function untuk merangkum semua perhitungan
  * @param {Object} financialData 
- * @param {number} financialData.initialCost - Biaya investasi awal (CAPEX)
- * @param {number[]} financialData.yearlyBenefits - Array benefit tiap tahun (misal selama 5 tahun)
- * @param {number[]} financialData.yearlyCosts - Array biaya operasional (OPEX) tiap tahun
- * @param {number} financialData.discountRate - Suku bunga / Discount rate untuk NPV (default: 0.1 atau 10%)
+ * @param {Object} surveyScores - Scores from survey (businessDomain, technologyDomain)
+ * @param {Object} quadrantFactors - Factors weights from McFarlan quadrant 
  */
-const calculateProjectValue = (financialData) => {
+const calculateProjectValue = (financialData, surveyScores, quadrantFactors) => {
   // Fallback jika tidak ada data yang masuk
   if (!financialData) {
     return { success: false, message: 'No financial data provided' };
@@ -118,13 +169,20 @@ const calculateProjectValue = (financialData) => {
   const paybackPeriod = calculatePaybackPeriod(initialCost, yearlyBenefits, yearlyCosts);
   const bea = calculateBreakEvenPoint(initialCost, yearlyBenefits, yearlyCosts);
 
+  let ieResult = { ieScore: null, feasibilityStatus: null };
+  if (surveyScores && quadrantFactors) {
+    ieResult = calculateInformationEconomics(roi, surveyScores, quadrantFactors);
+  }
+
   return {
     success: true,
     metrics: {
       roi: roi, // Dalam Persen
       npv: npv, // Dalam Nominal Uang
       paybackPeriod: paybackPeriod, // Dalam Tahun (bisa bernilai null jika tidak balik modal)
-      breakEvenYear: bea.breakEvenYear // Tahun keberapa BEP tercapai
+      breakEvenYear: bea.breakEvenYear, // Tahun keberapa BEP tercapai
+      ieScore: ieResult.ieScore,
+      feasibilityStatus: ieResult.feasibilityStatus
     },
     breakEvenAnalysisDetail: bea.data // Detail laporan kumulatif per tahun
   };
@@ -132,6 +190,7 @@ const calculateProjectValue = (financialData) => {
 
 export {
   calculateProjectValue,
+  calculateInformationEconomics,
   calculateROI,
   calculateNPV,
   calculatePaybackPeriod,
