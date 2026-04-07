@@ -8,7 +8,7 @@ const chatWithBot = async (req, res, next) => {
     if (!payload && (!message || typeof message !== "string")) {
       return res.status(400).json({
         status: "error",
-        message: "Kirim 'payload' atau minimal field 'message'.",
+        message: "Send 'payload' or at least the 'message' field.",
       });
     }
 
@@ -41,7 +41,7 @@ const getProjectChatHistory = async (req, res, next) => {
 
     return res.status(200).json({
       status: "success",
-      message: "Berhasil mengambil riwayat obrolan proyek.",
+      message: "Successfully retrieved project chat history.",
       data: chat.history,
     });
   } catch (error) {
@@ -57,14 +57,14 @@ const sendProjectChatMessage = async (req, res, next) => {
     if (!message || typeof message !== "string") {
       return res.status(400).json({
         status: "error",
-        message: "Kirim minimal field 'message'.",
+        message: "Send at least the 'message' field.",
       });
     }
 
     // Ambil data project
     const project = await Project.findById(projectId);
     if (!project) {
-      return res.status(404).json({ status: "error", message: "Proyek tidak ditemukan." });
+      return res.status(404).json({ status: "error", message: "Project not found." });
     }
 
     // Ambil atau buat chat history
@@ -81,17 +81,17 @@ const sendProjectChatMessage = async (req, res, next) => {
 
     if (historyForModel.length === 0) {
       // Injeksi konteks project sebelum pesan pertama
-      const systemContext = `Anda adalah asisten konsultan IT (IT Investment Chatbot). Jawablah pertanyaan user mengenai proyek investasi IT berikut ini.
-Nama Proyek: ${project.projectName}
-Industri: ${project.industry}
-Skala: ${project.scale}
+      const systemContext = `You are an IT consultant assistant (IT Investment Chatbot). Answer user questions regarding the following IT investment project:
+Project Name: ${project.projectName}
+Industry: ${project.industry}
+Scale: ${project.scale}
 Detail Plan: ${project.plan}
-Status Kelayakan: ${project.status}
+Feasibility Status: ${project.status}
 
-Bantulah merinci atau memperdalam analisa di atas jika user bertanya. Tolong jawab dalam Bahasa Indonesia yang ramah dan profesional.`;
+Help refine or deepen the analysis above if the user asks. Please answer in friendly and professional English.`;
       
       historyForModel.push({ role: "user", content: systemContext });
-      historyForModel.push({ role: "assistant", content: "Baik, saya mengerti. Ada yang bisa saya bantu tentang proyek ini?" });
+      historyForModel.push({ role: "assistant", content: "Understood. How can I help you with this project?" });
     }
 
     // Kirim request ke bot
@@ -100,7 +100,7 @@ Bantulah merinci atau memperdalam analisa di atas jika user bertanya. Tolong jaw
       history: historyForModel,
     });
 
-    const aiMessage = result.text || "Mohon maaf, saya sedang mengalami gangguan.";
+    const aiMessage = result.text || "Sorry, I am experiencing technical difficulties.";
 
     // Simpan ke database
     chat.history.push({ role: "user", content: message });

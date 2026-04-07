@@ -96,7 +96,7 @@ const calculateBreakEvenPoint = (initialCost, yearlyBenefits, yearlyCosts) => {
  * Menghitung nilai skor Information Economics (IE) berdasarkan input domain dan data kuadran.
  */
 const calculateInformationEconomics = (roiPercentage, surveyScores, quadrantFactors) => {
-  if (!surveyScores || !quadrantFactors) return { ieScore: 0, feasibilityStatus: "Data Tidak Lengkap" };
+  if (!surveyScores || !quadrantFactors) return { ieScore: 0, feasibilityStatus: "Incomplete Data" };
 
   // 1. Convert ROI Percentage to ROI Score (0 to 5)
   // ROI percentage from parameter is e.g. 15.5 for 15.5%
@@ -136,11 +136,11 @@ const calculateInformationEconomics = (roiPercentage, surveyScores, quadrantFact
   const finalScore = Number(ieScore.toFixed(2));
 
   let feasibilityStatus = "";
-  if (finalScore <= -20) feasibilityStatus = "Sangat Tidak Layak";
-  else if (finalScore <= 10) feasibilityStatus = "Tidak Layak";
-  else if (finalScore <= 40) feasibilityStatus = "Cukup";
-  else if (finalScore <= 70) feasibilityStatus = "Layak";
-  else feasibilityStatus = "Sangat Layak";
+  if (finalScore <= -20) feasibilityStatus = "Highly Infeasible";
+  else if (finalScore <= 10) feasibilityStatus = "Infeasible";
+  else if (finalScore <= 40) feasibilityStatus = "Fair";
+  else if (finalScore <= 70) feasibilityStatus = "Feasible";
+  else feasibilityStatus = "Highly Feasible";
 
   return { ieScore: finalScore, feasibilityStatus };
 };
