@@ -67,7 +67,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Middleware tambahan untuk meminimalisir error dari req Postman (form-data)
-app.use(upload.none());
+// app.use(upload.none()); // Baris ini dihapus karena memblokir upload file secara global
 app.use(express.static(path.join(__dirname, "..", "FE-Test")));
 
 // 🔐 Passport (WAJIB untuk Google Auth)

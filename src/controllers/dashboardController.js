@@ -1,4 +1,4 @@
-import { getDashboardData } from "../services/dashboard.service.js";
+import { getDashboardData } from "../services/dashboardService.js";
 
 export const getDashboard = async (req, res, next) => {
   try {

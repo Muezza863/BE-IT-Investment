@@ -2,6 +2,9 @@ import { User } from "../models/index.js";
 import { compare } from "../helpers/password.js";
 import { generateToken } from "../helpers/token.js";
 import transporter from "../helpers/mailer.js";
+import { s3Client } from "../services/b2Connect.js";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getImageUrl } from "../helpers/s3Helper.js";
 
 const deriveNameFromEmail = (email) => email?.split("@")[0] || "User";
 
@@ -43,24 +46,21 @@ export const register = async (req, res, next) => {
       role: user.role,
     });
 
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      businessName: user.businessName,
+      role: user.role,
+      avatar: await getImageUrl(user.avatar),
+    };
+
     res.status(201).json({
       success: true,
       message: "Registration successful",
       token,
-      data: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        businessName: user.businessName,
-        role: user.role,
-      },
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        businessName: user.businessName,
-        role: user.role,
-      }
+      data: userData,
+      user: userData,
     });
   } catch (error) {
     if (next) return next(error);
@@ -143,23 +143,21 @@ export const login = async (req, res, next) => {
       role: user.role,
     });
 
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      businessName: user.businessName,
+      role: user.role,
+      avatar: await getImageUrl(user.avatar),
+    };
+
     res.json({
       success: true,
       message: "Login successful",
       token,
-      data: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        businessName: user.businessName,
-        role: user.role,
-      },
+      data: userData,
+      user: userData,
     });
   } catch (error) {
     if (next) return next(error);
@@ -271,11 +269,10 @@ export const getProfile = async (req, res) => {
       "-password -resetOtp -resetOtpExpiry"
     );
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    const userObj = user.toObject();
+    userObj.avatar = await getImageUrl(user.avatar);
 
-    res.json({ success: true, data: user });
+    res.json({ success: true, data: userObj });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -299,21 +296,16 @@ export const updateProfile = async (req, res) => {
       const fileName = `avatars/user-${user._id}-${Date.now()}-${file.originalname}`;
 
       const uploadCommand = new PutObjectCommand({
-        Bucket: process.env.B2_BUCKET_NAME,
+        Bucket: process.env.B2_KEY_NAME, 
         Key: fileName,
         Body: file.buffer,
         ContentType: file.mimetype,
       });
 
-      // Kirim file ke Backblaze
       await s3Client.send(uploadCommand);
 
-      // Asumsi bucket Anda disetting ke "Public". 
-      // Format URL S3 Compatible Backblaze: endpoint/bucketName/fileName
-      const avatarUrl = `${process.env.B2_ENDPOINT}/${process.env.B2_BUCKET_NAME}/${fileName}`;
-      
-      // Update field avatar user dengan URL dari Backblaze
-      user.avatar = avatarUrl;
+      // Simpan PATH (key) saja ke database, bukan URL lengkap
+      user.avatar = fileName;
     }
 
     // 2. Update field teks lainnya
@@ -333,7 +325,10 @@ export const updateProfile = async (req, res) => {
       "-password -resetOtp -resetOtpExpiry"
     );
 
-    res.json({ success: true, message: "Profile updated successfully", data: updated });
+    const updatedObj = updated.toObject();
+    updatedObj.avatar = await getImageUrl(updated.avatar);
+
+    res.json({ success: true, message: "Profile updated successfully", data: updatedObj });
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ success: false, message: error.message });
