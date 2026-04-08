@@ -362,6 +362,7 @@ Submits initial project data. The AI will generate a financial draft in the back
 
 ```json
 {
+  "projectName": "IT Project - Healthcare"
   "industry": "Healthcare",
   "employeeCount": 120,
   "plan": "Implement an integrated hospital management system",
