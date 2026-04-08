@@ -64,10 +64,8 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// Middleware tambahan untuk meminimalisir error dari req Postman (form-data)
-app.use(upload.none());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, "..", "FE-Test")));
 
 // 🔐 Passport (WAJIB untuk Google Auth)

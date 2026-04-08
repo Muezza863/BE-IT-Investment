@@ -19,6 +19,8 @@ import {
   deleteConsultant,
   getAdminDashboard,
   getDashboard,
+  updateInsight,
+  resetInsight,
 } from "../controllers/index.js";
 
 import authRoutes from "./authRoutes.js";
@@ -49,6 +51,8 @@ router.get("/admin/dashboard", authentication, authorizeRoles("admin"), getAdmin
 
 // 🔥 DASHBOARD FIGMA (REQUIRES AUTH)
 router.get("/dashboard", authentication, getDashboard);
+router.post("/dashboard/insight", authentication, updateInsight);
+router.delete("/dashboard/insight", authentication, resetInsight);
 
 // PROJECT
 router.get("/projects", authentication, getProjects);

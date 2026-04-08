@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema(
     resetOtpExpiry: {
       type: Date,
     },
+    customInsightNote: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
