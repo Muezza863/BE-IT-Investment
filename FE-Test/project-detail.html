@@ -396,7 +396,7 @@
       window.location.href = 'login.html';
     }
 
-    const API_BASE = 'http://localhost:3000/api/projects';
+    const API_BASE = 'https://unvicarious-camelia-porky.ngrok-free.dev/api/projects';
     
     // UI Elements
     const uiProjId = document.getElementById('uiProjId');
@@ -615,6 +615,20 @@
     const chatbotInput = document.getElementById('chatbotInput');
     const chatbotSend = document.getElementById('chatbotSend');
     const chatbotMessages = document.getElementById('chatbotMessages');
+
+    const BASE_URL = 'https://unvicarious-camelia-porky.ngrok-free.dev';
+
+    async function apiFetch(endpoint, options = {}) {
+      return fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Content-Type': 'application/json',
+          ...options.headers,
+        }
+      });
+    }
+
     
     function getAuthHeaders() {
       const headers = { 'Content-Type': 'application/json' };

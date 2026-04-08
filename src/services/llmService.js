@@ -318,15 +318,6 @@ OUTPUT JSON (STRICT – WAJIB VALID)
 }
 
 ========================================
-OUTPUT TAMBAHAN (WAJIB)
-========================================
-
-SETELAH JSON, tampilkan:
-
-1. TABEL RINGKAS INVESTASI (rapi & mudah dibaca)
-2. KEY INSIGHT SUMMARY (maks 120 kata, langsung ke keputusan)
-
-========================================
 STRICT RULES
 ========================================
 - Semua angka harus punya dasar (formula)

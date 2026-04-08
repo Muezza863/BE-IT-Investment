@@ -38,7 +38,7 @@ const simulationSchema = new mongoose.Schema({
 
 const projectSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  projectName: { type: String, required: true },
+  projectName: { type: String },
   industry: { type: String, required: true },
   scale: { type: String, required: true },
   plan: { type: String, required: true },

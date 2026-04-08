@@ -14,7 +14,7 @@ const getBusinessScale = (employeeCount) => {
 const createProject = async (req, res) => {
   try {
     const { 
-      industry, employeeCount, plan, location,
+      projectName, industry, employeeCount, plan, location,
       businessDomain, technologyDomain, currentIT, futureIT, DM, RE 
     } = req.body;
 
@@ -51,12 +51,12 @@ const createProject = async (req, res) => {
     const mcfarlanResult = determineMcFarlanQuadrant(currentIT, futureIT, DM, RE);
 
     // 3. Simpan proyek awal ke Database (MongoDB) dengan status DRAFTING
-    const defaultProjectName = `IT Project - ${industry}`;
+    const finalProjectName = projectName || `IT Project - ${industry}`;
     const defaultDescription = `IT solution implementation for ${scale} scale in ${location} area.`;
 
     const newProject = new Project({
       userId: req.user.id,
-      projectName: defaultProjectName,
+      projectName: finalProjectName,
       industry,
       scale,
       plan,
@@ -84,7 +84,7 @@ const createProject = async (req, res) => {
     console.log(`[Project ${newProject._id}] Requesting estimate from Gemini in background...`);
     
     generateProjectDraft({ 
-      projectName: defaultProjectName, 
+      projectName: finalProjectName, 
       industry, 
       scale, 
       plan, 
@@ -214,6 +214,7 @@ const getProjects = async (req, res) => {
 
     const formattedProjects = projects.map(project => ({
       id: project._id,
+      projectName: project.projectName,
       industry: project.industry,
       status: project.status,
       date: formatDateStr(project.createdAt)
