@@ -23,6 +23,7 @@
    - [Get Project Detail](#23-get-project-detail)
    - [Update / Run Simulation](#24-update--run-simulation)
    - [Delete Project](#25-delete-project)
+   - [Get Project Reports](#26-get-project-reports)
 3. [Project Chatbot](#3-project-chatbot)
    - [Get Chat History](#31-get-chat-history)
    - [Send Chat Message](#32-send-chat-message)
@@ -454,7 +455,7 @@ Returns a list of all projects belonging to the authenticated user.
       "projectName": "IT Project - Healthcare"
       "industry": "Healthcare",
       "status": "WAITING_USER_INPUT",
-      "date": "Mon,7 Apr 2025"
+      "date": "Mon, 7 Apr 2025"
     }
   ]
 }
@@ -656,6 +657,43 @@ Deletes a project. Only projects with status `ERROR` can be deleted.
   "message": "Project successfully deleted."
 }
 ```
+
+---
+
+### 2.6 Get Project Reports
+
+Returns a list of all simulations/edits performed on a project, formatted as a report list for frontend consumption.
+
+- **Endpoint:** `GET /projects/:id/reports`
+- **Auth:** Required (project owner only)
+
+#### Response `200 OK`
+
+```json
+{
+  "status": "success",
+  "message": "Project reports successfully retrieved.",
+  "data": [
+    {
+      "scenarioName": "Optimistic Scenario",
+      "date": "Mon, 7 Apr 2025",
+      "roi": "38.75%",
+      "ieScore": 52.5,
+      "feasibilityStatus": "Feasible",
+      "pdfUrl": "https://api.kada-it-investasi.com/reports/64abc.../0/pdf"
+    }
+  ]
+}
+```
+
+| Field             | Type   | Description                                      |
+| ----------------- | ------ | ------------------------------------------------ |
+| scenarioName      | string | Reference name of the simulation/scenario        |
+| date              | string | Date of simulation (Format: "Day, DD Mon YYYY")  |
+| roi               | string | ROI formatted as a percentage string             |
+| ieScore           | number | IE Score from the simulation results             |
+| feasibilityStatus | string | Final feasibility status                         |
+| pdfUrl            | string | Placeholder link for future PDF report download |
 
 ---
 

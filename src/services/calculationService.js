@@ -38,6 +38,8 @@ const calculateNPV = (initialCost, yearlyBenefits, yearlyCosts, discountRate) =>
  * Menghitung Payback Period (dalam tahun)
  */
 const calculatePaybackPeriod = (initialCost, yearlyBenefits, yearlyCosts) => {
+  if (initialCost === 0) return 0; // Jika investasi 0, payback period dianggap 0 (lunas)
+  
   let cumulativeCashFlow = -initialCost;
   
   for (let i = 0; i < yearlyBenefits.length; i++) {
@@ -47,13 +49,15 @@ const calculatePaybackPeriod = (initialCost, yearlyBenefits, yearlyCosts) => {
     cumulativeCashFlow += netCashFlow;
     
     if (cumulativeCashFlow >= 0) {
-      // Menghitung pecahan tahun agar lebih akurat
+      // Pastikan netCashFlow tidak 0 untuk menghindari NaN
+      if (netCashFlow === 0) return Number(i.toFixed(2));
+      
       const fraction = Math.abs(previousCumulative) / netCashFlow;
       return Number((i + fraction).toFixed(2));
     }
   }
   
-  return null; // Jika tidak balik modal dalam periode yang diberikan
+  return null; 
 };
 
 /**
@@ -101,12 +105,19 @@ const calculateInformationEconomics = (roiPercentage, surveyScores, quadrantFact
   // 1. Convert ROI Percentage to ROI Score (0 to 5)
   // ROI percentage from parameter is e.g. 15.5 for 15.5%
   let roiScore = 0;
-  if (roiPercentage < 1) roiScore = 0;
-  else if (roiPercentage <= 299) roiScore = 1;
-  else if (roiPercentage <= 499) roiScore = 2;
-  else if (roiPercentage <= 699) roiScore = 3;
-  else if (roiPercentage <= 899) roiScore = 4;
-  else roiScore = 5;
+  if (isNaN(roiPercentage) || !isFinite(roiPercentage) || roiPercentage < 1) {
+    roiScore = 0;
+  } else if (roiPercentage <= 299) {
+    roiScore = 1;
+  } else if (roiPercentage <= 499) {
+    roiScore = 2;
+  } else if (roiPercentage <= 699) {
+    roiScore = 3;
+  } else if (roiPercentage <= 899) {
+    roiScore = 4;
+  } else {
+    roiScore = 5;
+  }
 
   const bDomainScores = surveyScores.businessDomain || {};
   const tDomainScores = surveyScores.technologyDomain || {};
