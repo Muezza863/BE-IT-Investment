@@ -362,6 +362,7 @@ Submits initial project data. The AI will generate a financial draft in the back
 
 ```json
 {
+  "projectName": "IT Project - Healthcare"
   "industry": "Healthcare",
   "employeeCount": 120,
   "plan": "Implement an integrated hospital management system",
@@ -450,6 +451,7 @@ Returns a list of all projects belonging to the authenticated user.
   "data": [
     {
       "id": "64abc...",
+      "projectName": "IT Project - Healthcare"
       "industry": "Healthcare",
       "status": "WAITING_USER_INPUT",
       "date": "Mon,7 Apr 2025"
