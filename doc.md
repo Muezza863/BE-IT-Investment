@@ -450,6 +450,7 @@ Returns a list of all projects belonging to the authenticated user.
   "data": [
     {
       "id": "64abc...",
+      "projectName": "IT Project - Healthcare"
       "industry": "Healthcare",
       "status": "WAITING_USER_INPUT",
       "date": "Mon,7 Apr 2025"
