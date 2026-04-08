@@ -6,8 +6,13 @@ import routes from "./routes/index.js";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
+
+console.log("✅ Base imports loaded");
+console.log("✅ Routes imported:", typeof routes);
 import "./services/index.js";
 import errorHandler from "./middlewares/errorHandler.js";
+
+console.log("✅ All imports loaded successfully");
 
 // =======================
 // 🔧 CONFIG
@@ -68,6 +73,12 @@ app.use(express.static(path.join(__dirname, "..", "FE-Test")));
 // 🔐 Passport (WAJIB untuk Google Auth)
 app.use(passport.initialize());
 
+// 🔥 DEBUG: Log all requests
+app.use((req, res, next) => {
+  console.log(`📍 ${req.method} ${req.path}`);
+  next();
+});
+
 // =======================
 // 📦 ROUTES
 // =======================
@@ -89,7 +100,17 @@ app.get("/test", (req, res) => {
 });
 
 // semua route masuk sini
+console.log("🔧 Routes object:", routes);
+console.log("🔧 Router paths:", routes.stack
+  .filter(layer => layer.route)
+  .map(layer => ({ path: layer.route.path, methods: Object.keys(layer.route.methods) }))
+);
 app.use("/api", routes);
+
+// 🧪 TEST ROUTE
+app.get("/api/test-direct", (req, res) => {
+  res.json({ success: true, message: "Direct test route works!" });
+});
 
 // =======================
 // ❌ GLOBAL ERROR HANDLER
