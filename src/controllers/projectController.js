@@ -31,24 +31,38 @@ const createProject = async (req, res) => {
       });
     }
 
-    // Validasi pengecekan isi objek (Level 2)
-    const { SM, CA, MI, CR, OR } = businessDomain;
-    const { SA, DU, TU, IR } = technologyDomain;
+    // Validasi pengecekan isi objek (Level 2) & Casting ke Number
+    const SM = Number(businessDomain.SM);
+    const CA = Number(businessDomain.CA);
+    const MI = Number(businessDomain.MI);
+    const CR = Number(businessDomain.CR);
+    const OR = Number(businessDomain.OR);
+
+    const SA = Number(technologyDomain.SA);
+    const DU = Number(technologyDomain.DU);
+    const TU = Number(technologyDomain.TU);
+    const IR = Number(technologyDomain.IR);
 
     if (
-      SM === undefined || CA === undefined || MI === undefined || CR === undefined || OR === undefined ||
-      SA === undefined || DU === undefined || TU === undefined || IR === undefined
+      isNaN(SM) || isNaN(CA) || isNaN(MI) || isNaN(CR) || isNaN(OR) ||
+      isNaN(SA) || isNaN(DU) || isNaN(TU) || isNaN(IR)
     ) {
       return res.status(400).json({ 
         status: 'error', 
-        message: 'All nested fields inside businessDomain (SM, CA, MI, CR, OR) and technologyDomain (SA, DU, TU, IR) are strictly required!' 
+        message: 'All scores inside businessDomain and technologyDomain must be valid numbers!' 
       });
     }
+
+    // Map array values to Numbers safely
+    const currentITNum = (currentIT || []).map(val => Number(val) || 0);
+    const futureITNum = (futureIT || []).map(val => Number(val) || 0);
+    const DMNum = (DM || []).map(val => Number(val) || 0);
+    const RENum = (RE || []).map(val => Number(val) || 0);
 
     const scale = getBusinessScale(employeeCount);
 
     // Hitung posisi McFarlan Strategic Grid berdasarkan skor kuesioner
-    const mcfarlanResult = determineMcFarlanQuadrant(currentIT, futureIT, DM, RE);
+    const mcfarlanResult = determineMcFarlanQuadrant(currentITNum, futureITNum, DMNum, RENum);
 
     // 3. Simpan proyek awal ke Database (MongoDB) dengan status DRAFTING
     const finalProjectName = projectName || `IT Project - ${industry}`;
@@ -63,10 +77,10 @@ const createProject = async (req, res) => {
       location,
       businessDomain: { SM, CA, MI, CR, OR },
       technologyDomain: { SA, DU, TU, IR },
-      currentIT,
-      futureIT,
-      DM,
-      RE,
+      currentIT: currentITNum,
+      futureIT: futureITNum,
+      DM: DMNum,
+      RE: RENum,
       mcfarlan: mcfarlanResult,
       status: 'DRAFTING', // Setup awal, menunggu proses AI
     });
@@ -205,7 +219,8 @@ const formatDateStr = (dateInput) => {
   const month = months[d.getMonth()];
   const year = d.getFullYear();
   
-  return `${dayName},${day} ${month} ${year}`;
+  // Menambahkan spasi setelah koma sesuai permintaan: "Sat, 27 Feb 2025"
+  return `${dayName}, ${day} ${month} ${year}`;
 };
 
 const getProjects = async (req, res) => {
@@ -243,12 +258,14 @@ const updateDraftProject = async (req, res) => {
       opex = [], 
       tangibleBenefits = [], 
       intangibleBenefits = [], 
-      inflationRate = 0.05, 
-      taxRate = 0.11,
-      discountRate = 0.1,
-      years = 3, 
       scenarioName = "Simulasi" 
     } = req.body;
+
+    // Safely parse numbers with defaults
+    const inflationRate = isNaN(Number(req.body.inflationRate)) ? 0.05 : Number(req.body.inflationRate);
+    const taxRate = isNaN(Number(req.body.taxRate)) ? 0.11 : Number(req.body.taxRate);
+    const discountRate = isNaN(Number(req.body.discountRate)) ? 0.1 : Number(req.body.discountRate);
+    const years = isNaN(parseInt(req.body.years)) ? 3 : parseInt(req.body.years);
 
     const project = await Project.findById(id);
     if (!project) {
@@ -367,10 +384,51 @@ const updateDraftProject = async (req, res) => {
   }
 };
 
+const getProjectReports = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Project not found.'
+      });
+    }
+
+    // Mapping simulationHistory menjadi list report
+    const reports = project.simulationHistory.map((sim, index) => {
+      return {
+        scenarioName: sim.scenarioName,
+        date: formatDateStr(sim.calculatedAt),
+        roi: `${(sim.financialResults.roi * 100).toFixed(2)}%`,
+        ieScore: sim.financialResults.ieScore,
+        feasibilityStatus: sim.financialResults.feasibilityStatus,
+        pdfUrl: `https://api.kada-it-investasi.com/reports/${project._id}/${index}/pdf` // Placeholder link sesuai permintaan
+      };
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Project reports successfully retrieved.',
+      data: reports
+    });
+  } catch (error) {
+    console.error('Error in getProjectReports:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Failed to retrieve reports.', 
+      error: error.message 
+    });
+  }
+};
+
 export { 
   createProject, 
   getProjectDraft, 
   deleteProject, 
   getProjects, 
-  updateDraftProject 
+  updateDraftProject,
+  getProjectReports
 };

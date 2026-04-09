@@ -9,6 +9,7 @@ import {
   deleteProject,
   getProjects,
   updateDraftProject,
+  getProjectReports,
   chatWithBot,
   getProjectChatHistory,
   sendProjectChatMessage,
@@ -60,6 +61,7 @@ router.delete("/dashboard/insight", authentication, resetInsight);
 router.get("/projects", authentication, getProjects);
 router.post("/projects", authentication, authorizeRoles("user"), createProject);
 router.get("/projects/:id", authentication, getProjectDraft);
+router.get("/projects/:id/reports", authentication, protectProject, getProjectReports);
 router.put("/projects/:id", authentication, protectProject, updateDraftProject);
 router.delete("/projects/:id", authentication, protectProject, deleteProject);
 
