@@ -6,6 +6,15 @@ import { generateToken } from "../helpers/token.js";
 
 dotenv.config();
 
+const appBaseUrl = (process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/+$/, "");
+const googleCallbackUrl = process.env.GOOGLE_REDIRECT_URI || `${appBaseUrl}/api/auth/google/callback`;
+
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  console.warn("⚠️ GOOGLE OAUTH is not fully configured: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing.");
+}
+
+console.log(`✅ Google OAuth callback URL: ${googleCallbackUrl} (must match Google Console)`);
+
 // =====================================
 // GOOGLE OAUTH STRATEGY (FINAL CLEAN)
 // =====================================
@@ -14,7 +23,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.BASE_URL}/api/auth/google/callback`,
+      callbackURL: googleCallbackUrl,
     },
 
     async (accessToken, refreshToken, profile, done) => {
@@ -72,6 +81,8 @@ passport.use(
     }
   )
 );
+
+console.log(`✅ Google callback URL set to: ${googleCallbackUrl}`);
 
 // =====================================
 // OPTIONAL (ONLY IF USE SESSION)

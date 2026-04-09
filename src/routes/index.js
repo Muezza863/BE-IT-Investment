@@ -34,7 +34,9 @@ import { authorization as protectProject } from "../middlewares/authMiddleware.j
 const router = Router();
 
 // AUTH
+console.log("✅ Mounting auth routes at /auth");
 router.use("/auth", authRoutes);
+console.log("✅ Auth routes mounted successfully");
 
 // CHATBOT GLOBAL
 router.post("/chatbot", chatWithBot);

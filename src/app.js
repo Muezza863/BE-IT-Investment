@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import passport from "./config/passport.js";
 import routes from "./routes/index.js";
+import authRoutes from "./routes/authRoutes.js";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -43,39 +44,37 @@ const allowedOrigins = [
   "http://127.0.0.1:63255",
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Izinkan request tanpa origin (Postman, curl)
-    if (!origin) return callback(null, true);
-    // Izinkan semua URL ngrok
-    if (
-      origin.endsWith(".ngrok-free.app") ||
-      origin.endsWith(".ngrok-free.dev") ||
-      origin.endsWith(".ngrok.io")
-    ) {
-      return callback(null, true);
-    }
-    // Izinkan origin dari whitelist
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error(`CORS: Origin '${origin}' tidak diizinkan`));
-  },
-  credentials: true,
-}));
+// TEMPORARILY DISABLE CORS AND OTHER MIDDLEWARE
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin) return callback(null, true);
+//     if (
+//       origin.endsWith(".ngrok-free.app") ||
+//       origin.endsWith(".ngrok-free.dev") ||
+//       origin.endsWith(".ngrok.io")
+//     ) {
+//       return callback(null, true);
+//     }
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     }
+//     return callback(new Error(`CORS: Origin '${origin}' tidak diizinkan`));
+//   },
+//   credentials: true,
+// }));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, "..", "FE-Test")));
 
-// 🔐 Passport (WAJIB untuk Google Auth)
-app.use(passport.initialize());
+// TEMPORARILY DISABLE PASSPORT
+// app.use(passport.initialize());
 
-// 🔥 DEBUG: Log all requests
-app.use((req, res, next) => {
-  console.log(`📍 ${req.method} ${req.path}`);
-  next();
-});
+// TEMPORARILY DISABLE REQUEST LOGGING
+// app.use((req, res, next) => {
+//   console.log(`📍 ${req.method} ${req.path}`);
+//   next();
+// });
 
 // =======================
 // 📦 ROUTES
@@ -85,6 +84,16 @@ app.get("/", (req, res) => {
     success: true,
     message: "API is running 🚀",
   });
+});
+
+// Route untuk serve login page
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "FE-Test", "login.html"));
+});
+
+// Route untuk serve register page
+app.get("/register", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "FE-Test", "register.html"));
 });
 
 app.get("/consul", (req, res) => {
@@ -110,10 +119,16 @@ app.get("/api/test-direct", (req, res) => {
   res.json({ success: true, message: "Direct test route works!" });
 });
 
+// Temporary POST test route
+app.post("/api/test-post", (req, res) => {
+  console.log("POST body received:", req.body);
+  res.json({ success: true, message: "POST works!", received: req.body });
+});
+
 // =======================
-// ❌ GLOBAL ERROR HANDLER
+// ❌ GLOBAL ERROR HANDLER (TEMPORARILY DISABLED)
 // =======================
-app.use(errorHandler);
+// app.use(errorHandler);
 
 app.use((err, req, res, next) => {
   console.error("Global error handler triggered:", err);

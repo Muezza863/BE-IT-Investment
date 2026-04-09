@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 // 🔐 GENERATE ACCESS TOKEN
 // =======================
 export const generateToken = (payload) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured. Set JWT_SECRET in .env.");
+  }
+
   try {
     return jwt.sign(
       {

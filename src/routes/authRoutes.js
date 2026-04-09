@@ -21,6 +21,7 @@ router.post("/admins", authentication, authorizeRoles("admin"), createAdmin);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);
+console.log("✅ verify-otp POST route registered");
 router.post("/reset-password", authentication, resetPassword);
 
 router.get("/profile", authentication, getProfile);
@@ -35,6 +36,8 @@ router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
+    accessType: "offline",
+    prompt: "select_account",
     session: false,
   })
 );

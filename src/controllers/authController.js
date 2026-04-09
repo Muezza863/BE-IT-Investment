@@ -187,20 +187,44 @@ export const forgotPassword = async (req, res) => {
     user.resetOtpExpiry = expiry;
     await user.save();
 
-    await transporter.sendMail({
-      from: process.env.EMAIL,
-      to: email,
-      subject: "Password Reset OTP - InvesTECHy",
-      html: `
-        <h3>Reset Your Password</h3>
-        <p>Your OTP code is:</p>
-        <h1 style="letter-spacing: 8px;">${otp}</h1>
-        <p>This code is valid for <strong>10 minutes</strong>.</p>
-        <p>If you did not request a password reset, please ignore this email.</p>
-      `,
-    });
+    // For development/testing: return OTP directly instead of sending email
+    if (process.env.NODE_ENV !== 'production') {
+      return res.json({
+        success: true,
+        message: "OTP generated successfully (development mode)",
+        otp: otp, // Only in development!
+        email: email,
+        expiresIn: "10 minutes"
+      });
+    }
 
-    res.json({ success: true, message: "OTP code has been sent to your email" });
+    // Production: send email
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL,
+        to: email,
+        subject: "Password Reset OTP - InvesTECHy",
+        html: `
+          <h3>Reset Your Password</h3>
+          <p>Your OTP code is:</p>
+          <h1 style="letter-spacing: 8px;">${otp}</h1>
+          <p>This code is valid for <strong>10 minutes</strong>.</p>
+          <p>If you did not request a password reset, please ignore this email.</p>
+        `,
+      });
+
+      res.json({ success: true, message: "OTP code has been sent to your email" });
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      // Still return success but with OTP for testing
+      res.json({
+        success: true,
+        message: "OTP generated but email failed to send",
+        otp: otp, // Fallback for testing
+        email: email,
+        expiresIn: "10 minutes"
+      });
+    }
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -208,22 +232,33 @@ export const forgotPassword = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
   try {
+    console.log("✅ VERIFY OTP API HIT");
+    console.log("📝 Request Body:", JSON.stringify(req.body, null, 2));
+
     const { email, otp } = req.body;
 
     if (!email || !otp) {
+      console.log("❌ Missing email or otp");
       return res.status(400).json({ success: false, message: "Email and OTP are required" });
     }
 
+    console.log(`🔍 Finding user with email: ${email}`);
     const user = await User.findOne({ email });
+    
     if (!user || !user.resetOtp) {
+      console.log("❌ User not found or no OTP set");
       return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
+    console.log(`✅ User found. Comparing OTPs: ${user.resetOtp} vs ${otp}`);
+
     if (user.resetOtp !== otp) {
+      console.log("❌ OTP mismatch");
       return res.status(400).json({ success: false, message: "Incorrect OTP" });
     }
 
     if (new Date() > user.resetOtpExpiry) {
+      console.log("❌ OTP expired");
       return res.status(400).json({ success: false, message: "OTP has expired" });
     }
 
@@ -233,8 +268,10 @@ export const verifyOtp = async (req, res) => {
     user.resetOtpExpiry = undefined;
     await user.save();
 
+    console.log("✅ OTP verified successfully");
     res.json({ success: true, message: "OTP verified", resetToken });
   } catch (error) {
+    console.error("❌ VERIFY OTP ERROR:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -285,7 +322,7 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     // avatar dihapus dari req.body karena file gambar akan ada di req.file
-    const { firstName, lastName, businessName, role } = req.body;
+    const { name, firstName, lastName, businessName, role } = req.body;
 
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -308,15 +345,16 @@ export const updateProfile = async (req, res) => {
       // Kirim file ke Backblaze
       await s3Client.send(uploadCommand);
 
-      // Asumsi bucket Anda disetting ke "Public". 
+      // Asumsi bucket Anda disetting ke "Public".
       // Format URL S3 Compatible Backblaze: endpoint/bucketName/fileName
       const avatarUrl = `${process.env.B2_ENDPOINT}/${process.env.B2_BUCKET_NAME}/${fileName}`;
-      
+
       // Update field avatar user dengan URL dari Backblaze
       user.avatar = avatarUrl;
     }
 
     // 2. Update field teks lainnya
+    if (name !== undefined) user.name = name;
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
     if (businessName !== undefined) user.businessName = businessName;
