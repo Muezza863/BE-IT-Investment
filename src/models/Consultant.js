@@ -39,6 +39,10 @@ const consultantSchema = new mongoose.Schema(
         message: "Field 'email' wajib berupa link mailto yang valid.",
       },
     },
+    photo: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

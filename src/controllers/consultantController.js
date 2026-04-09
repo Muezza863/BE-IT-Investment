@@ -1,4 +1,7 @@
 import { Consultant } from "../models/index.js";
+import { s3Client } from "../services/b2Connect.js";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getImageUrl } from "../helpers/s3Helper.js";
 
 const generateConsultantId = async () => {
   const consultants = await Consultant.find(
@@ -17,6 +20,13 @@ const generateConsultantId = async () => {
 
   const nextNumber = String(maxNumber + 1).padStart(3, "0");
   return `consultant-${nextNumber}`;
+};
+
+const formatConsultantResponse = async (consultant) => {
+  if (!consultant) return null;
+  const consultantObj = consultant.toObject ? consultant.toObject() : consultant;
+  consultantObj.photo = await getImageUrl(consultantObj.photo);
+  return consultantObj;
 };
 
 const validateConsultantPayload = (payload, { isUpdate = false } = {}) => {
@@ -69,16 +79,20 @@ const sanitizeConsultantPayload = async (payload, existingConsultant = null, { a
     payload.spesialisasi?.map((item) => item.trim()) ?? existingConsultant?.spesialisasi,
   whatsapp: payload.whatsapp?.trim() ?? existingConsultant?.whatsapp,
   email: payload.email?.trim() ?? existingConsultant?.email,
+  photo: payload.photo?.trim() ?? existingConsultant?.photo,
 });
 
 const getConsultants = async (req, res, next) => {
   try {
     const consultants = await Consultant.find().sort({ createdAt: 1, nama: 1 });
+    const formattedConsultants = await Promise.all(
+      consultants.map((c) => formatConsultantResponse(c))
+    );
 
     res.status(200).json({
       status: "success",
       message: "Consultant list successfully retrieved.",
-      data: consultants,
+      data: formattedConsultants,
     });
   } catch (error) {
     next(error);
@@ -97,10 +111,12 @@ const getConsultantById = async (req, res, next) => {
       });
     }
 
+    const formattedConsultant = await formatConsultantResponse(consultant);
+
     return res.status(200).json({
       status: "success",
       message: "Consultant detail successfully retrieved.",
-      data: consultant,
+      data: formattedConsultant,
     });
   } catch (error) {
     next(error);
@@ -122,12 +138,30 @@ const createConsultant = async (req, res, next) => {
     const newConsultantPayload = await sanitizeConsultantPayload(req.body, null, {
       allowCustomId: false,
     });
+
+    // Handle photo upload if present
+    if (req.file) {
+      const file = req.file;
+      const fileName = `consultants/consultant-${newConsultantPayload.id}-${Date.now()}-${file.originalname}`;
+
+      const uploadCommand = new PutObjectCommand({
+        Bucket: process.env.B2_KEY_NAME,
+        Key: fileName,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      });
+
+      await s3Client.send(uploadCommand);
+      newConsultantPayload.photo = fileName;
+    }
+
     const newConsultant = await Consultant.create(newConsultantPayload);
+    const formattedConsultant = await formatConsultantResponse(newConsultant);
 
     return res.status(201).json({
       status: "success",
       message: "Consultant successfully created.",
-      data: newConsultant,
+      data: formattedConsultant,
     });
   } catch (error) {
     if (error?.code === 11000) {
@@ -164,6 +198,23 @@ const updateConsultant = async (req, res, next) => {
     }
 
     const updatedPayload = await sanitizeConsultantPayload(req.body, currentConsultant);
+
+    // Handle photo upload if present
+    if (req.file) {
+      const file = req.file;
+      const fileName = `consultants/consultant-${id}-${Date.now()}-${file.originalname}`;
+
+      const uploadCommand = new PutObjectCommand({
+        Bucket: process.env.B2_KEY_NAME,
+        Key: fileName,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      });
+
+      await s3Client.send(uploadCommand);
+      updatedPayload.photo = fileName;
+    }
+
     const updatedConsultant = await Consultant.findOneAndUpdate(
       { id },
       updatedPayload,
@@ -173,10 +224,12 @@ const updateConsultant = async (req, res, next) => {
       }
     );
 
+    const formattedConsultant = await formatConsultantResponse(updatedConsultant);
+
     return res.status(200).json({
       status: "success",
       message: "Consultant successfully updated.",
-      data: updatedConsultant,
+      data: formattedConsultant,
     });
   } catch (error) {
     if (error?.code === 11000) {

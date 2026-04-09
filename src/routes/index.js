@@ -31,8 +31,14 @@ import authRoutes from "./authRoutes.js";
 // =======================
 import { authentication, authorizeRoles } from "../middlewares/auth.js";
 import { authorization as protectProject } from "../middlewares/authMiddleware.js";
+import multer from "multer";
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
 
 // AUTH
 console.log("✅ Mounting auth routes at /auth");
@@ -45,8 +51,8 @@ router.post("/chatbot", chatWithBot);
 // CONSULTANTS
 router.get("/consultants", getConsultants);
 router.get("/consultants/:id", getConsultantById);
-router.post("/consultants", authentication, authorizeRoles("admin"), createConsultant);
-router.put("/consultants/:id", authentication, authorizeRoles("admin"), updateConsultant);
+router.post("/consultants", authentication, authorizeRoles("admin"), upload.single("photo"), createConsultant);
+router.put("/consultants/:id", authentication, authorizeRoles("admin"), upload.single("photo"), updateConsultant);
 router.delete("/consultants/:id", authentication, authorizeRoles("admin"), deleteConsultant);
 
 // ADMIN DASHBOARD
