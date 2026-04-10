@@ -35,7 +35,7 @@ router.put("/profile", authentication, upload.single("avatar"), updateProfile);
 router.get(
   "/google",
   passport.authenticate("google", {
-    scope: ["profile", "email"],
+    scope: ["email", "profile"],
     accessType: "offline",
     prompt: "select_account",
     session: false,
@@ -43,33 +43,56 @@ router.get(
 );
 
 // 🔹 STEP 2: callback dari Google
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: "/api/auth/failure",
-  }),
-  (req, res) => {
-    const { user, token } = req.user;
+router.get("/google/callback", (req, res, next) => {
+  console.log("📍 Google Callback Route hit");
+  
+  passport.authenticate("google", { session: false }, (err, data, info) => {
+    if (err) {
+      console.error("❌ Passport Auth Error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Internal Auth Error",
+        error: err.message,
+      });
+    }
 
-    res.json({
-      success: true,
-      message: "Google login successful",
-      token,
-      user: {
-        id: user._id || user.id,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-      },
-    });
-  }
-);
+    if (!data) {
+      console.warn("⚠️ No user data returned from Google Strategy. Info:", info);
+      return res.status(401).json({
+        success: false,
+        message: info?.message || "Google authentication failed",
+      });
+    }
+
+    // Success!
+    const { user, token } = data;
+    console.log(`✅ Google Auth Success for: ${user.email}`);
+
+    // REDIRECT TO FRONTEND (localhost:5173/auth/google)
+    const frontendUrl = `http://localhost:5173/auth/google?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`;
+    console.log(`🔗 Redirecting to frontend: ${frontendUrl}`);
+    res.redirect(frontendUrl);
+  })(req, res, next);
+});
 
 // =======================
-// ❌ FAILURE
+// ❌ FAILURE & DEBUG
 // =======================
+router.get("/debug", (req, res) => {
+  res.json({
+    message: "Auth Debug Info",
+    baseUrl: process.env.BASE_URL || "Not Set",
+    callbackUrl: "/api/auth/google/callback",
+    headers: {
+      host: req.headers.host,
+      forwardedHost: req.headers["x-forwarded-host"],
+      proto: req.headers["x-forwarded-proto"],
+    }
+  });
+});
+
 router.get("/failure", (req, res) => {
+  console.log("❌ Auth Failure session/req data:", req.flash ? req.flash("error") : "No flash error");
   res.status(401).json({
     success: false,
     message: "Google authentication failed",

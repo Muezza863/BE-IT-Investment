@@ -19,6 +19,7 @@ console.log("✅ All imports loaded successfully");
 // 🔧 CONFIG
 // =======================
 dotenv.config();
+console.log("📂 Environment variables loaded from .env");
 
 const app = express();
 app.set("trust proxy", true); // CRITICAL for ngrok/proxy support
@@ -71,11 +72,11 @@ app.use(express.static(path.join(__dirname, "..", "FE-Test")));
 // PASSPORT
 app.use(passport.initialize());
 
-// TEMPORARILY DISABLE REQUEST LOGGING
-// app.use((req, res, next) => {
-//   console.log(`📍 ${req.method} ${req.path}`);
-//   next();
-// });
+// REQUEST LOGGING
+app.use((req, res, next) => {
+  console.log(`📍 REQUEST: ${req.method} ${req.originalUrl} (Path: ${req.path})`);
+  next();
+});
 
 // =======================
 // 📦 ROUTES
@@ -107,12 +108,9 @@ app.get("/test", (req, res) => {
     });
 });
 
-// semua route masuk sini
-console.log("🔧 Routes object:", routes);
-console.log("🔧 Router paths:", routes.stack
-  .filter(layer => layer.route)
-  .map(layer => ({ path: layer.route.path, methods: Object.keys(layer.route.methods) }))
-);
+// AUTH ROUTES (DIRECT MOUNTING TO PREVENT 404)
+app.use("/api/auth", authRoutes);
+
 app.use("/api", routes);
 
 // 🧪 TEST ROUTE

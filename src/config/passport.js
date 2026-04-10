@@ -6,15 +6,20 @@ import { generateToken } from "../helpers/token.js";
 
 dotenv.config();
 
-const appBaseUrl = (process.env.BASE_URL || "").replace(/\/+$/, "");
-const googleCallbackUrl = process.env.GOOGLE_REDIRECT_URI || 
-  (appBaseUrl ? `${appBaseUrl}/api/auth/google/callback` : "/api/auth/google/callback");
+// VERIFIKASI ENV SAAT STARTUP
+const requiredEnv = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "JWT_SECRET"];
+requiredEnv.forEach(key => {
+  if (!process.env[key]) {
+     console.error(`❌ CRITICAL ENV MISSING: ${key}`);
+  } else {
+     console.log(`✅ ENV LOADED: ${key} (exists)`);
+  }
+});
 
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  console.warn("⚠️ GOOGLE OAUTH is not fully configured: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing.");
-}
+// FORCED REDIRECT URI FOR NGROK
+const googleCallbackUrl = "https://unvicarious-camelia-porky.ngrok-free.dev/api/auth/google/callback";
 
-console.log(`✅ Google OAuth callback URL: ${googleCallbackUrl} (Relative path is OK if proxy: true is set)`);
+console.log(`✅ HIGH PRIORITY CALLBACK URI: ${googleCallbackUrl}`);
 
 // =====================================
 // GOOGLE OAUTH STRATEGY (FINAL CLEAN)
@@ -30,12 +35,15 @@ passport.use(
 
     async (accessToken, refreshToken, profile, done) => {
       console.log("🔵 Google OAuth verify callback triggered");
+      console.log("📄 Profile from Google:", JSON.stringify(profile, null, 2));
+
       try {
         const email = profile.emails?.[0]?.value || null;
-        console.log(`📧 Received email from Google: ${email}`);
+        console.log(`📧 Resolved Email: ${email}`);
         const avatar = profile.photos?.[0]?.value || null;
 
         if (!email) {
+          console.error("❌ Email missing from Google Profile");
           return done(new Error("Email not available from Google"), null);
         }
 
@@ -80,6 +88,7 @@ passport.use(
         });
 
       } catch (error) {
+        console.error("❌ Google OAuth Strategy Error:", error);
         return done(error, null);
       }
     }

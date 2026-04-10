@@ -40,10 +40,8 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
-// AUTH
-console.log("✅ Mounting auth routes at /auth");
-router.use("/auth", authRoutes);
-console.log("✅ Auth routes mounted successfully");
+// AUTH (MOUNTED DIRECTLY IN APP.JS TO PREVENT 404)
+// router.use("/auth", authRoutes);
 
 // CHATBOT GLOBAL
 router.post("/chatbot", chatWithBot);
