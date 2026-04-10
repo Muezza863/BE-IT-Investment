@@ -33,6 +33,7 @@ const simulationSchema = new mongoose.Schema({
     ieScore: Number,
     feasibilityStatus: String
   },
+  pdfUrl: { type: String }, // Link to PDF report in B2
   calculatedAt: { type: Date, default: Date.now }
 });
 

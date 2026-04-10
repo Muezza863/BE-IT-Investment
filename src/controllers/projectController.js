@@ -1,5 +1,7 @@
-import { Project, Quadrant } from '../models/index.js'
 import { generateProjectDraft, determineMcFarlanQuadrant, calculateProjectValue } from '../services/index.js'
+import { generateAndUploadReport } from '../services/pdfService.js'
+import Project from '../models/Project.js'
+import Quadrant from '../models/Quadrant.js'
 // Fungsi untuk mengelompokkan skala bisnis berdasarkan jumlah karyawan
 const getBusinessScale = (employeeCount) => {
   const count = parseInt(employeeCount, 10);
@@ -365,14 +367,30 @@ const updateDraftProject = async (req, res) => {
 
     project.simulationHistory.push(simulationEntry);
 
-    // Simulation history is capped at 10 items via the return error above.
+    // Generate & upload PDF report (non-blocking on failure)
+    try {
+        await project.save(); // Save first to persist simulation entry
+        const lastIndex = project.simulationHistory.length - 1;
+        const pdfUrl = await generateAndUploadReport(project, project.simulationHistory[lastIndex]);
+        project.simulationHistory[lastIndex].pdfUrl = pdfUrl;
+        await project.save();
+    } catch (pdfError) {
+        console.error('Failed to generate PDF, saving project without PDF URL:', pdfError.message);
+        await project.save(); // Still save even if PDF fails
+    }
 
-    await project.save();
-
+    const latestEntry = project.simulationHistory[project.simulationHistory.length - 1];
     res.status(200).json({
       status: 'success',
-      message: 'Project successfully calculated and updated.',
-      data: project
+      message: 'Project successfully calculated and updated with PDF report.',
+      data: {
+        projectId: project._id,
+        status: project.status,
+        scenarioName: latestEntry.scenarioName,
+        financialResults: latestEntry.financialResults,
+        pdfUrl: latestEntry.pdfUrl || null,
+        calculatedAt: latestEntry.calculatedAt
+      }
     });
   } catch (error) {
     console.error('Error in updateDraftProject:', error);
@@ -405,7 +423,7 @@ const getProjectReports = async (req, res) => {
         roi: `${(sim.financialResults.roi * 100).toFixed(2)}%`,
         ieScore: sim.financialResults.ieScore,
         feasibilityStatus: sim.financialResults.feasibilityStatus,
-        pdfUrl: `https://api.kada-it-investasi.com/reports/${project._id}/${index}/pdf` // Placeholder link sesuai permintaan
+        pdfUrl: sim.pdfUrl || null // Use actual URL from DB
       };
     });
 

@@ -586,18 +586,18 @@ Submits user-defined financial data (CAPEX, OPEX, Benefits) to run a financial s
 
 #### Response `200 OK`
 
-The full updated project document is returned, including the new entry added to `simulationHistory`.
+On success, the API returns a condensed update of the project and the latest simulation results, including the generated PDF report URL.
 
 ```json
 {
   "status": "success",
-  "message": "Project successfully calculated and updated.",
+  "message": "Project successfully calculated and updated with PDF report.",
   "data": {
-    "_id": "64abc...",
+    "projectId": "64abc...",
     "status": "CALCULATED",
     "simulationHistory": [
       {
-        "scenarioName": "Optimistic Scenario",
+    "scenarioName": "Optimistic Scenario",
         "simulatedData": { ... },
         "simulationSettings": {
           "inflationRate": 0.05,
@@ -605,11 +605,11 @@ The full updated project document is returned, including the new entry added to 
           "discountRate": 0.1,
           "years": 3
         },
-        "financialResults": {
-          "npv": 45231450.50,
-          "roi": 38.75,
-          "paybackPeriod": 2.34,
-          "breakEvenYear": 3,
+    "financialResults": {
+      "npv": 45231450.50,
+      "roi": 38.75,
+      "paybackPeriod": 2.34,
+      "breakEvenYear": 3,
           "breakEvenAnalysisDetail": [
             {
               "year": 1,
@@ -620,11 +620,12 @@ The full updated project document is returned, including the new entry added to 
               "net": -57950000
             }
           ],
-          "ieScore": 52.5,
-          "feasibilityStatus": "Feasible"
-        },
-        "calculatedAt": "2025-04-07T06:00:00.000Z"
-      }
+      "ieScore": 52.5,
+      "feasibilityStatus": "Feasible"
+    },
+    "pdfUrl": "https://<b2-endpoint>/reports/64abc.../12345678-report.pdf",
+    "calculatedAt": "2025-04-07T06:00:00.000Z"
+  }
     ]
   }
 }
@@ -693,7 +694,7 @@ Returns a list of all simulations/edits performed on a project, formatted as a r
 | roi               | string | ROI formatted as a percentage string             |
 | ieScore           | number | IE Score from the simulation results             |
 | feasibilityStatus | string | Final feasibility status                         |
-| pdfUrl            | string | Placeholder link for future PDF report download |
+| pdfUrl            | string | Publicly accessible URL for the 3-page PDF report |
 
 ---
 
@@ -830,6 +831,7 @@ Returns a list of all registered IT consultants.
       "spesialisasi": ["IT Strategy", "Digital Transformation"],
       "whatsapp": "https://wa.me/628123456789",
       "email": "mailto:budi@example.com",
+      "photo": "https://...",
       "createdAt": "...",
       "updatedAt": "..."
     }
@@ -863,7 +865,8 @@ Returns a single consultant by their custom `id` (e.g. `consultant-001`).
     "nama": "Dr. Budi Santoso",
     "spesialisasi": ["IT Strategy"],
     "whatsapp": "https://wa.me/628123456789",
-    "email": "mailto:budi@example.com"
+    "email": "mailto:budi@example.com",
+    "photo": "https://..."
   }
 }
 ```
@@ -876,8 +879,9 @@ Creates a new consultant entry. The `id` is auto-generated (custom IDs are not a
 
 - **Endpoint:** `POST /consultants`
 - **Auth:** Required (admin role)
+- **Content-Type:** `multipart/form-data`
 
-#### Request Body
+#### Request Body (form-data)
 
 ```json
 {
@@ -894,6 +898,7 @@ Creates a new consultant entry. The `id` is auto-generated (custom IDs are not a
 | spesialisasi | string[] | ✅       | Array of at least 1 non-empty string                   |
 | whatsapp     | string   | ✅       | Must match `https://wa.me/{digits}` format             |
 | email        | string   | ✅       | Must match `mailto:{email}` format                     |
+| photo        | file     | ❌       | Consultant photo file (max 5MB)                        |
 
 #### Response `201 Created`
 
@@ -913,6 +918,7 @@ Updates an existing consultant. All fields are optional — only provide the fie
 
 - **Endpoint:** `PUT /consultants/:id`
 - **Auth:** Required (admin role)
+- **Content-Type:** `multipart/form-data`
 
 #### Path Parameters
 
@@ -928,6 +934,8 @@ Updates an existing consultant. All fields are optional — only provide the fie
   "spesialisasi": ["IT Strategy", "Cloud Computing"]
 }
 ```
+
+> You can also upload a new `photo` file.
 
 #### Response `200 OK`
 
@@ -1052,4 +1060,4 @@ POST /projects
 
 ---
 
-*Last updated: April 2025 — InvesTECHy Backend v1.0*
+*Last updated: April 2026 — InvesTechy Backend v1.1*

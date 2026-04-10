@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Investment Report - <%= projectName %></title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-green: #0a2a1a;
+            --mid-green: #1a4a2a;
+            --light-green: #2a6a3a;
+            --gold: #c9a227;
+            --gold-light: #e8c547;
+            --gold-dark: #a07c10;
+            --white: #ffffff;
+            --off-white: #f5f5f0;
+            --text-dark: #1a1a1a;
+            --text-gray: #555;
+            --text-light: #888;
+            --positive: #22c55e;
+            --negative: #ef4444;
+            --card-bg: #f8faf8;
+            --border: #d0ddd0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: var(--white);
+            color: var(--text-dark);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        /* ======================== PAGE STRUCTURE ======================== */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+        }
+        .page:last-child {
+            page-break-after: avoid;
+        }
+
+        /* ======================== HEADER ======================== */
+        .page-header {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--mid-green) 60%, var(--light-green) 100%);
+            padding: 18px 22px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201,162,39,0.25) 0%, transparent 70%);
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            right: 60px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201,162,39,0.15) 0%, transparent 70%);
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+            color: var(--dark-green);
+        }
+        .brand-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gold-light);
+            letter-spacing: 0.5px;
+        }
+        .brand-name span {
+            color: var(--white);
+        }
+        .header-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .header-title .gold-text {
+            color: var(--gold-light);
+        }
+        .header-subtitle {
+            font-size: 10px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 3px;
+            font-weight: 400;
+        }
+        .header-wave {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 160px;
+            height: 60px;
+            opacity: 0.3;
+        }
+
+        /* ======================== PAGE BODY ======================== */
+        .page-body {
+            flex: 1;
+            padding: 16px 20px;
+            background: var(--white);
+        }
+
+        /* ======================== SECTION TITLE ======================== */
+        .section-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--gold-dark);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--gold);
+            position: relative;
+        }
+
+        /* ======================== CARDS ======================== */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .card-dark {
+            background: var(--dark-green);
+            color: var(--white);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .card-gold {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+            color: var(--white);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .card-title {
+            font-size: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        .card-dark .card-title, .card-gold .card-title {
+            color: rgba(255,255,255,0.7);
+        }
+        .card-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+        .card-dark .card-value { color: var(--gold-light); }
+        .card-gold .card-value { color: var(--white); }
+
+        /* ======================== GRID LAYOUTS ======================== */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .grid-5-3 { display: grid; grid-template-columns: 5fr 3fr; gap: 12px; }
+        .grid-3-2 { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; }
+
+        /* ======================== TABLES ======================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9px;
+        }
+        table thead tr {
+            background: var(--dark-green);
+            color: var(--white);
+        }
+        table thead th {
+            padding: 7px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8.5px;
+            letter-spacing: 0.5px;
+        }
+        table thead th:last-child { text-align: right; }
+        table tbody tr:nth-child(even) { background: #f0f5f0; }
+        table tbody tr:nth-child(odd) { background: var(--white); }
+        table tbody td {
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+        table tbody td:last-child { text-align: right; font-weight: 600; }
+        table tfoot tr {
+            background: linear-gradient(to right, var(--dark-green), var(--mid-green));
+            color: var(--white);
+        }
+        table tfoot td {
+            padding: 8px 10px;
+            font-weight: 700;
+            font-size: 10px;
+        }
+        table tfoot td:last-child { text-align: right; color: var(--gold-light); }
+        .table-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: rgba(201,162,39,0.15);
+            border-radius: 4px;
+            text-align: center;
+            line-height: 18px;
+            margin-right: 4px;
+            font-size: 10px;
+        }
+
+        /* ======================== INFO ROWS ======================== */
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 9px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label {
+            color: var(--text-light);
+            min-width: 70px;
+            font-weight: 500;
+        }
+        .info-value {
+            color: var(--text-dark);
+            font-weight: 600;
+            flex: 1;
+        }
+        .info-icon {
+            font-size: 11px;
+            min-width: 16px;
+        }
+
+        /* ======================== SCORE BARS ======================== */
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 5px;
+            font-size: 8.5px;
+        }
+        .score-label { min-width: 22px; font-weight: 700; color: var(--text-dark); }
+        .score-bar-bg {
+            flex: 1;
+            height: 7px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .score-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--dark-green), var(--gold));
+            border-radius: 4px;
+        }
+        .score-val { min-width: 22px; text-align: right; font-weight: 700; color: var(--text-dark); }
+
+        /* ======================== MCFARLAN MATRIX ======================== */
+        .mcfarlan-wrapper {
+            background: linear-gradient(135deg, var(--dark-green), var(--mid-green));
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .mcfarlan-title {
+            font-size: 8px;
+            font-weight: 700;
+            color: var(--gold-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .mcfarlan-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 3px;
+            position: relative;
+            aspect-ratio: 1;
+            max-width: 120px;
+            margin: 0 auto 6px;
+        }
+        .mcfarlan-cell {
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            min-height: 30px;
+        }
+        .mcfarlan-cell.active {
+            background: rgba(201,162,39,0.3);
+            color: var(--gold-light);
+        }
+        .mcfarlan-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--gold-light);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 6px rgba(201,162,39,0.6);
+        }
+        .mcfarlan-quadrant-label {
+            font-size: 8.5px;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+        .mcfarlan-coords {
+            font-size: 7.5px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* ======================== INSIGHT CARD ======================== */
+        .insight-card {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        .insight-card::before {
+            content: '💡';
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            font-size: 20px;
+            opacity: 0.3;
+        }
+        .insight-title {
+            font-size: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .insight-text {
+            font-size: 8.5px;
+            line-height: 1.5;
+        }
+
+        /* ======================== BENEFIT BADGES ======================== */
+        .benefit-badge {
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 9px;
+        }
+        .badge-green {
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.3);
+        }
+        .badge-blue {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.25);
+        }
+        .badge-title {
+            font-size: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+        }
+        .badge-green .badge-title { color: #16a34a; }
+        .badge-blue .badge-title { color: #2563eb; }
+        .badge-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            font-size: 8.5px;
+        }
+        .badge-item:last-child { border-bottom: none; }
+        .badge-item-name { color: var(--text-gray); }
+        .badge-item-val { font-weight: 700; color: var(--text-dark); }
+        .badge-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            padding-top: 4px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        /* ======================== FINANCIAL RESULT ROWS ======================== */
+        .fin-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid #eef2ee;
+        }
+        .fin-row:last-child { border-bottom: none; }
+        .fin-row-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fin-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .fin-icon.green { background: rgba(34,197,94,0.15); }
+        .fin-icon.blue { background: rgba(59,130,246,0.12); }
+        .fin-icon.orange { background: rgba(249,115,22,0.12); }
+        .fin-icon.purple { background: rgba(139,92,246,0.12); }
+        .fin-icon.gold { background: rgba(201,162,39,0.15); }
+        .fin-label { font-size: 8.5px; color: var(--text-light); font-weight: 500; }
+        .fin-value-box {
+            background: var(--dark-green);
+            color: var(--gold-light);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 5px;
+            white-space: nowrap;
+        }
+
+        /* ======================== BREAK-EVEN CHART (SVG) ======================== */
+        .chart-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .chart-title {
+            font-size: 8.5px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        .chart-legend {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 7.5px;
+            color: var(--text-gray);
+        }
+        .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+        .legend-dot.bar { background: var(--dark-green); }
+        .legend-dot.line { background: var(--gold); }
+
+        /* ======================== BREAK-EVEN TABLE ======================== */
+        .be-table {
+            width: 100%;
+            font-size: 9px;
+            border-collapse: collapse;
+        }
+        .be-table th {
+            background: var(--dark-green);
+            color: var(--white);
+            padding: 6px 10px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+        .be-table th:not(:first-child) { text-align: right; }
+        .be-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .be-table td:not(:first-child) { text-align: right; font-weight: 600; }
+        .be-table tr:nth-child(even) td { background: #f0f5f0; }
+        .be-pos { color: #16a34a; }
+        .be-neg { color: #dc2626; }
+
+        /* ======================== CONCLUSION CARD ======================== */
+        .conclusion-card {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--mid-green) 100%);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        .conclusion-card::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(201,162,39,0.3) 0%, transparent 70%);
+        }
+        .conclusion-icon { font-size: 16px; margin-bottom: 4px; }
+        .conclusion-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 6px;
+        }
+        .conclusion-text {
+            font-size: 8.5px;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.88);
+        }
+        .conclusion-text strong { color: var(--gold-light); }
+
+        /* ======================== FOOTER ======================== */
+        .page-footer {
+            background: var(--dark-green);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-left {
+            font-size: 8px;
+            color: rgba(255,255,255,0.5);
+        }
+        .footer-right {
+            font-size: 8px;
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+        .page-number {
+            font-size: 8px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ======================== DIVIDER ======================== */
+        .divider { height: 1px; background: var(--border); margin: 12px 0; }
+        .spacer-sm { height: 8px; }
+        .spacer-md { height: 12px; }
+
+        /* ======================== STATUS BADGE ======================== */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 700;
+        }
+        .status-feasible { background: rgba(34,197,94,0.15); color: #16a34a; border: 1px solid rgba(34,197,94,0.3); }
+        .status-not-feasible { background: rgba(239,68,68,0.12); color: #dc2626; border: 1px solid rgba(239,68,68,0.25); }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        @media print {
+            body { margin: 0; }
+            .page { page-break-after: always; }
+            .page:last-child { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<!--                     PAGE 1: EXECUTIVE SUMMARY                      -->
+<!-- ================================================================ -->
+<div class="page">
+    <div class="page-header">
+        <div class="header-brand">
+            <div class="brand-icon">IT</div>
+            <div class="brand-name"><span>Inves</span>Techy</div>
+        </div>
+        <div class="header-title">
+            <%= projectName.toUpperCase() %>
+        </div>
+        <div class="header-subtitle">Executive Summary</div>
+    </div>
+
+    <div class="page-body">
+        <div class="grid-5-3" style="align-items: start;">
+
+            <!-- LEFT COLUMN -->
+            <div>
+                <div class="section-label">Project Overview</div>
+                <div class="card" style="margin-bottom:10px;">
+                    <div class="info-row"><span class="info-icon">🏗️</span><span class="info-label">Project Name</span><span class="info-value"><%= projectName %></span></div>
+                    <div class="info-row"><span class="info-icon">🏭</span><span class="info-label">Industry</span><span class="info-value"><%= industry %></span></div>
+                    <div class="info-row"><span class="info-icon">⚙️</span><span class="info-label">Scale</span><span class="info-value"><%= scale %></span></div>
+                    <div class="info-row"><span class="info-icon">💼</span><span class="info-label">Plan</span><span class="info-value"><%= plan %></span></div>
+                    <div class="info-row"><span class="info-icon">📍</span><span class="info-label">Location</span><span class="info-value"><%= location %></span></div>
+                    <div class="info-row"><span class="info-icon">📅</span><span class="info-label">Report Date</span><span class="info-value"><%= date %></span></div>
+                    <div class="info-row"><span class="info-icon">🔖</span><span class="info-label">Scenario</span><span class="info-value"><%= scenarioName %></span></div>
+                </div>
+
+                <div class="section-label">Business Domain Scores</div>
+                <div class="card" style="margin-bottom:10px;">
+                    <% const bKeys = Object.keys(businessDomain); %>
+                    <% bKeys.forEach(key => { %>
+                    <div class="score-row">
+                        <span class="score-label"><%= key %></span>
+                        <div class="score-bar-bg">
+                            <div class="score-bar-fill" style="width: <%= (businessDomain[key] / 5 * 100).toFixed(0) %>%;"></div>
+                        </div>
+                        <span class="score-val"><%= businessDomain[key].toFixed(1) %></span>
+                    </div>
+                    <% }); %>
+                </div>
+
+                <div class="section-label">Technology Domain Scores</div>
+                <div class="card" style="margin-bottom:10px;">
+                    <% const tKeys = Object.keys(technologyDomain); %>
+                    <% tKeys.forEach(key => { %>
+                    <div class="score-row">
+                        <span class="score-label"><%= key %></span>
+                        <div class="score-bar-bg">
+                            <div class="score-bar-fill" style="width: <%= (technologyDomain[key] / 5 * 100).toFixed(0) %>%;"></div>
+                        </div>
+                        <span class="score-val"><%= technologyDomain[key].toFixed(1) %></span>
+                    </div>
+                    <% }); %>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-title">💡 Key Insight</div>
+                    <div class="insight-text">
+                        The project is positioned in the <strong><%= mcfarlan.quadrant ? mcfarlan.quadrant.toUpperCase() : 'N/A' %></strong> quadrant,
+                        indicating a <%= mcfarlan.quadrant === 'Strategic' ? 'significant business impact and strong strategic potential. High-priority investment is recommended.' :
+                            mcfarlan.quadrant === 'Factory' ? 'operational dependency. Stable investment to maintain current IT performance.' :
+                            mcfarlan.quadrant === 'Turnaround' ? 'high future potential. Moderate investment to enable future transformation.' :
+                            'support role. Investment should be evaluated for cost efficiency.' %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: McFarlan Matrix -->
+            <div>
+                <div class="section-label">McFarlan Matrix</div>
+                <div class="mcfarlan-wrapper" style="margin-bottom:10px;">
+                    <div class="mcfarlan-title">Strategic Position</div>
+                    <%
+                        const quad = mcfarlan.quadrant;
+                        const isStrategic = quad === 'Strategic';
+                        const isFactory = quad === 'Factory' || quad === 'Key Operational';
+                        const isTurnaround = quad === 'Turnaround' || quad === 'High Potential';
+                        const isSupport = quad === 'Support';
+                        /*  Grid layout (top-left = High Potential, top-right = Strategic,
+                                          bottom-left = Support,        bottom-right = Factory)  */
+                    %>
+                    <div class="mcfarlan-grid">
+                        <!-- top-left: High Potential / Turnaround -->
+                        <div class="mcfarlan-cell <%= isTurnaround ? 'active' : '' %>">Turnaround</div>
+                        <!-- top-right: Strategic -->
+                        <div class="mcfarlan-cell <%= isStrategic ? 'active' : '' %>">Strategic</div>
+                        <!-- bottom-left: Support -->
+                        <div class="mcfarlan-cell <%= isSupport ? 'active' : '' %>">Support</div>
+                        <!-- bottom-right: Factory -->
+                        <div class="mcfarlan-cell <%= isFactory ? 'active' : '' %>">Factory</div>
+                        <%
+                            const mx = mcfarlan.coordinates ? mcfarlan.coordinates.x : 5;
+                            const my = mcfarlan.coordinates ? mcfarlan.coordinates.y : 5;
+                            const dotLeft = ((mx / 10) * 100).toFixed(1);
+                            const dotTop = (100 - (my / 10) * 100).toFixed(1);
+                        %>
+                        <div class="mcfarlan-dot" style="left: <%= dotLeft %>%; top: <%= dotTop %>%;"></div>
+                    </div>
+                    <div class="mcfarlan-quadrant-label">Current – <%= quad %></div>
+                    <div class="mcfarlan-coords">Coordinates: (<%= mx.toFixed(1) %>, <%= my.toFixed(1) %>)</div>
+                </div>
+
+                <!-- Quick Financial Preview -->
+                <div class="section-label">Financial Snapshot</div>
+                <div style="margin-bottom:8px;">
+                    <div class="card-dark" style="margin-bottom:6px;">
+                        <div class="card-title">NPV</div>
+                        <div class="card-value" style="font-size:14px;">
+                            <%= financialResults.npv >= 0 ? '' : '-' %><%= formatCurrency(Math.abs(financialResults.npv)) %>
+                        </div>
+                    </div>
+                    <div class="card-dark" style="margin-bottom:6px;">
+                        <div class="card-title">ROI</div>
+                        <div class="card-value" style="font-size:14px;"><%= (financialResults.roi * 100).toFixed(1) %>%</div>
+                    </div>
+                    <div class="card-dark" style="margin-bottom:6px;">
+                        <div class="card-title">Payback Period</div>
+                        <div class="card-value" style="font-size:14px;"><%= financialResults.paybackPeriod.toFixed(1) %> <span style="font-size:10px;font-weight:400;">Years</span></div>
+                    </div>
+                    <div class="card-dark" style="margin-bottom:6px;">
+                        <div class="card-title">Feasibility Status</div>
+                        <div style="margin-top:3px;">
+                            <span class="status-badge <%= financialResults.feasibilityStatus === 'Feasible' ? 'status-feasible' : 'status-not-feasible' %>">
+                                <%= financialResults.feasibilityStatus %>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-dark">
+                        <div class="card-title">IE Score</div>
+                        <div class="card-value" style="font-size:14px;"><%= financialResults.ieScore.toFixed(1) %> <span style="font-size:10px;font-weight:400;">/100</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-footer">
+        <span class="footer-left">InvesTEchy – IT Investment Analysis</span>
+        <span class="page-number">Page 1 of 3</span>
+        <span class="footer-right">Generated: <%= date %></span>
+    </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!--                  PAGE 2: FINANCIAL BREAKDOWN                       -->
+<!-- ================================================================ -->
+<div class="page">
+    <div class="page-header" style="padding: 16px 22px 12px;">
+        <div class="header-brand">
+            <div class="brand-icon">IT</div>
+            <div class="brand-name"><span>Inves</span>Techy</div>
+        </div>
+        <div class="header-title">FINANCIAL BREAKDOWN</div>
+        <div class="header-subtitle">Investment &amp; Benefit Analysis</div>
+    </div>
+
+    <div class="page-body">
+        <%
+            const totalCapex = simulatedData.capex.reduce((s, i) => s + (i.nominal || 0), 0);
+            const totalOpex  = simulatedData.opex.reduce((s, i) => s + (i.nominal || 0), 0);
+            const totalTangible = simulatedData.tangibleBenefits.reduce((s, i) => s + (i.nominal || 0), 0);
+            const totalIntangible = simulatedData.intangibleBenefits.reduce((s, i) => s + (i.nominal || 0), 0);
+            const totalBenefits = totalTangible + totalIntangible;
+        %>
+
+        <!-- CAPEX Table -->
+        <div class="section-label">CAPEX (Capital Expenditure)</div>
+        <table style="margin-bottom:12px; border-radius:8px; overflow:hidden;">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Item</th>
+                    <th>Description</th>
+                    <th>Nominal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% simulatedData.capex.forEach((item, idx) => { %>
+                <tr>
+                    <td style="color:var(--text-light);"><span class="table-icon">🖥️</span></td>
+                    <td style="font-weight:600;"><%= item.item %></td>
+                    <td style="color:var(--text-gray);"><%= item.description || '-' %></td>
+                    <td><%= formatCurrency(item.nominal || 0) %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="color:rgba(255,255,255,0.8);">Total CAPEX</td>
+                    <td><%= formatCurrency(totalCapex) %></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- OPEX Table -->
+        <div class="section-label">OPEX (Operational Expenditure – Monthly)</div>
+        <table style="margin-bottom:12px; border-radius:8px; overflow:hidden;">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Item</th>
+                    <th>Description</th>
+                    <th>Nominal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% simulatedData.opex.forEach((item, idx) => { %>
+                <tr>
+                    <td style="color:var(--text-light);"><span class="table-icon">⚙️</span></td>
+                    <td style="font-weight:600;"><%= item.item %></td>
+                    <td style="color:var(--text-gray);"><%= item.description || '-' %></td>
+                    <td><%= formatCurrency(item.nominal || 0) %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="color:rgba(255,255,255,0.8);">Total OPEX (Monthly)</td>
+                    <td><%= formatCurrency(totalOpex) %></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Benefits Overview -->
+        <div class="section-label">Benefits Overview</div>
+        <div class="grid-2" style="margin-bottom:10px;">
+            <!-- Tangible Benefits -->
+            <div class="benefit-badge badge-green">
+                <div class="badge-title">✅ Tangible Benefits</div>
+                <% simulatedData.tangibleBenefits.forEach(item => { %>
+                <div class="badge-item">
+                    <span class="badge-item-name"><%= item.item %></span>
+                    <span class="badge-item-val"><%= formatCurrency(item.nominal || 0) %></span>
+                </div>
+                <% }); %>
+                <div class="badge-total">
+                    <span>Subtotal</span>
+                    <span style="color:#16a34a;"><%= formatCurrency(totalTangible) %></span>
+                </div>
+            </div>
+            <!-- Intangible Benefits -->
+            <div class="benefit-badge badge-blue">
+                <div class="badge-title">🔷 Intangible Benefits</div>
+                <% simulatedData.intangibleBenefits.forEach(item => { %>
+                <div class="badge-item">
+                    <span class="badge-item-name"><%= item.item %></span>
+                    <span class="badge-item-val"><%= formatCurrency(item.nominal || 0) %></span>
+                </div>
+                <% }); %>
+                <div class="badge-total">
+                    <span>Subtotal</span>
+                    <span style="color:#2563eb;"><%= formatCurrency(totalIntangible) %></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Benefits Banner -->
+        <div class="conclusion-card" style="text-align:center; padding: 14px;">
+            <div style="font-size:9px; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Total Benefits</div>
+            <div style="font-size:26px; font-weight:900; color:var(--gold-light);">
+                <%= formatCurrency(totalBenefits) %>
+            </div>
+            <div style="font-size:8.5px; color:rgba(255,255,255,0.55); margin-top:3px;">Tangible + Intangible Benefits Combined</div>
+        </div>
+
+        <!-- Simulation Settings -->
+        <div class="spacer-md"></div>
+        <div class="section-label">Simulation Settings</div>
+        <div class="grid-4">
+            <div class="card" style="text-align:center;">
+                <div class="card-title">Inflation Rate</div>
+                <div class="card-value" style="font-size:14px; color:var(--dark-green);"><%= (simulationSettings.inflationRate * 100).toFixed(1) %>%</div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="card-title">Tax Rate</div>
+                <div class="card-value" style="font-size:14px; color:var(--dark-green);"><%= (simulationSettings.taxRate * 100).toFixed(1) %>%</div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="card-title">Discount Rate</div>
+                <div class="card-value" style="font-size:14px; color:var(--dark-green);"><%= (simulationSettings.discountRate * 100).toFixed(1) %>%</div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="card-title">Analysis Period</div>
+                <div class="card-value" style="font-size:14px; color:var(--dark-green);"><%= simulationSettings.years %> <span style="font-size:9px;font-weight:400;">Years</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-footer">
+        <span class="footer-left">InvesTEchy – IT Investment Analysis</span>
+        <span class="page-number">Page 2 of 3</span>
+        <span class="footer-right">Generated: <%= date %></span>
+    </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!--               PAGE 3: SIMULATION & FEASIBILITY                     -->
+<!-- ================================================================ -->
+<div class="page">
+    <div class="page-header" style="padding: 16px 22px 12px;">
+        <div class="header-brand">
+            <div class="brand-icon">IT</div>
+            <div class="brand-name"><span>Inves</span>Techy</div>
+        </div>
+        <div class="header-title">SIMULATION &amp; FEASIBILITY</div>
+        <div class="header-subtitle"><%= scenarioName %></div>
+    </div>
+
+    <div class="page-body">
+        <div class="grid-3-2" style="align-items: start;">
+
+            <!-- LEFT: Financial Results + Chart + Break-Even Table -->
+            <div>
+                <div class="section-label">Financial Results</div>
+
+                <div class="fin-row">
+                    <div class="fin-row-left">
+                        <div class="fin-icon green">📈</div>
+                        <div>
+                            <div class="card-title">Net Present Value</div>
+                            <div style="font-size:8px; color:var(--text-light);">NPV</div>
+                        </div>
+                    </div>
+                    <div class="fin-value-box">
+                        <%= financialResults.npv >= 0 ? '' : '-' %><%= formatCurrency(Math.abs(financialResults.npv)) %>
+                    </div>
+                </div>
+
+                <div class="fin-row">
+                    <div class="fin-row-left">
+                        <div class="fin-icon blue">💹</div>
+                        <div>
+                            <div class="card-title">Return on Investment</div>
+                            <div style="font-size:8px; color:var(--text-light);">ROI</div>
+                        </div>
+                    </div>
+                    <div class="fin-value-box"><%= (financialResults.roi * 100).toFixed(1) %>%</div>
+                </div>
+
+                <div class="fin-row">
+                    <div class="fin-row-left">
+                        <div class="fin-icon orange">⏱️</div>
+                        <div>
+                            <div class="card-title">Payback Period</div>
+                            <div style="font-size:8px; color:var(--text-light);">Investment recovery time</div>
+                        </div>
+                    </div>
+                    <div class="fin-value-box"><%= financialResults.paybackPeriod.toFixed(1) %> Yrs</div>
+                </div>
+
+                <div class="fin-row">
+                    <div class="fin-row-left">
+                        <div class="fin-icon purple">📊</div>
+                        <div>
+                            <div class="card-title">Break-Even Year</div>
+                            <div style="font-size:8px; color:var(--text-light);">Cumulative positive</div>
+                        </div>
+                    </div>
+                    <div class="fin-value-box">Year <%= financialResults.breakEvenYear || 'N/A' %></div>
+                </div>
+
+                <div class="fin-row">
+                    <div class="fin-row-left">
+                        <div class="fin-icon gold">🏆</div>
+                        <div>
+                            <div class="card-title">IE Score</div>
+                            <div style="font-size:8px; color:var(--text-light);">Investment Efficiency</div>
+                        </div>
+                    </div>
+                    <div class="fin-value-box"><%= financialResults.ieScore.toFixed(1) %> /100</div>
+                </div>
+
+                <div style="margin-top:6px; padding:8px 0; display:flex; align-items:center; justify-content:space-between;">
+                    <span style="font-size:9px; font-weight:700; color:var(--text-dark);">Feasibility:</span>
+                    <span class="status-badge <%= financialResults.feasibilityStatus === 'Feasible' ? 'status-feasible' : 'status-not-feasible' %>">
+                        <%= financialResults.feasibilityStatus === 'Feasible' ? '✅ Highly Feasible' : '❌ Not Feasible' %>
+                    </span>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Cash Flow Chart (SVG Bar Chart) -->
+                <div class="section-label">Cash Flow &amp; Break-Even Analysis</div>
+                <div class="chart-section">
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot bar"></div> Net Cash Flow</div>
+                        <div class="legend-item"><div class="legend-dot line"></div> Cumulative</div>
+                    </div>
+                    <%
+                        const detail = financialResults.breakEvenAnalysisDetail || [];
+                        const netFlows = detail.map(d => d.netCashFlow || 0);
+                        const cumFlows = detail.map(d => d.cumulativeCashFlow || 0);
+                        const allVals = [...netFlows, ...cumFlows, 0];
+                        const maxVal = Math.max(...allVals.map(Math.abs)) || 1;
+                        const svgH = 90;
+                        const svgW = 220;
+                        const barW = detail.length > 0 ? Math.floor((svgW - 30) / (detail.length * 2.5)) : 20;
+                        const zeroY = svgH * 0.6; // zero line at 60% from top
+                        const yScale = (zeroY - 5) / maxVal;
+                    %>
+                    <svg width="100%" viewBox="0 0 <%= svgW %> <%= svgH %>" preserveAspectRatio="xMidYMid meet">
+                        <!-- Zero line -->
+                        <line x1="25" y1="<%= zeroY.toFixed(1) %>" x2="<%= svgW - 5 %>" y2="<%= zeroY.toFixed(1) %>" stroke="#ccc" stroke-width="0.8" stroke-dasharray="3,2"/>
+                        <!-- Y axis label hints -->
+                        <text x="2" y="<%= (zeroY - (yScale * maxVal * 0.7)).toFixed(1) %>" font-size="5" fill="#888">+</text>
+                        <text x="2" y="<%= (zeroY + (yScale * maxVal * 0.7)).toFixed(1) %>" font-size="5" fill="#888">–</text>
+                        <% detail.forEach((d, i) => {
+                            const x = 30 + i * (svgW - 35) / Math.max(detail.length, 1);
+                            const netH = Math.abs((d.netCashFlow || 0) * yScale);
+                            const netY = (d.netCashFlow || 0) >= 0 ? zeroY - netH : zeroY;
+                            const barsColor = (d.netCashFlow || 0) >= 0 ? '#0a2a1a' : '#ef4444';
+                        %>
+                        <!-- Bar -->
+                        <rect x="<%= (x - barW/2).toFixed(1) %>" y="<%= netY.toFixed(1) %>" width="<%= barW %>" height="<%= netH.toFixed(1) %>" fill="<%= barsColor %>" rx="1.5" opacity="0.85"/>
+                        <!-- Bar value label -->
+                        <text x="<%= x.toFixed(1) %>" y="<%= ((d.netCashFlow||0) >= 0 ? netY - 2 : netY + netH + 7).toFixed(1) %>" font-size="5.5" fill="<%= barsColor %>" text-anchor="middle" font-weight="700">
+                            <%= Math.round((d.netCashFlow||0)/1000000) %>M
+                        </text>
+                        <!-- X label -->
+                        <text x="<%= x.toFixed(1) %>" y="<%= (svgH - 2).toFixed(1) %>" font-size="5.5" fill="#555" text-anchor="middle">Yr <%= i+1 %></text>
+                        <% }); %>
+                        <!-- Cumulative line -->
+                        <% if (detail.length > 1) { %>
+                        <polyline points="<%= detail.map((d, i) => {
+                            const x = 30 + i * (svgW - 35) / Math.max(detail.length, 1);
+                            const cy = zeroY - (d.cumulativeCashFlow || 0) * yScale;
+                            return x.toFixed(1) + ',' + Math.max(2, Math.min(svgH - 8, cy)).toFixed(1);
+                        }).join(' ') %>"
+                            fill="none" stroke="#c9a227" stroke-width="1.5" stroke-linejoin="round"/>
+                        <% detail.forEach((d, i) => {
+                            const x = 30 + i * (svgW - 35) / Math.max(detail.length, 1);
+                            const cy = zeroY - (d.cumulativeCashFlow || 0) * yScale;
+                            const cyClamped = Math.max(2, Math.min(svgH - 8, cy));
+                        %>
+                        <circle cx="<%= x.toFixed(1) %>" cy="<%= cyClamped.toFixed(1) %>" r="2.5" fill="#c9a227"/>
+                        <text x="<%= x.toFixed(1) %>" y="<%= (cyClamped - 4).toFixed(1) %>" font-size="5" fill="#a07c10" text-anchor="middle"><%= Math.round((d.cumulativeCashFlow||0)/1000000) %>M</text>
+                        <% }); %>
+                        <% } %>
+                    </svg>
+                </div>
+
+                <div class="spacer-sm"></div>
+
+                <!-- Break-Even Table -->
+                <div class="section-label">Break-Even Table</div>
+                <table class="be-table" style="border-radius:8px; overflow:hidden;">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th style="text-align:right;">Net Cash Flow</th>
+                            <th style="text-align:right;">Cumulative Cash Flow</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% (financialResults.breakEvenAnalysisDetail || []).forEach((row, i) => { %>
+                        <tr>
+                            <td style="font-weight:600;">Year <%= i + 1 %></td>
+                            <td class="<%= (row.netCashFlow || 0) >= 0 ? 'be-pos' : 'be-neg' %>">
+                                <%= (row.netCashFlow || 0) >= 0 ? '' : '-' %><%= formatCurrency(Math.abs(row.netCashFlow || 0)) %>
+                            </td>
+                            <td class="<%= (row.cumulativeCashFlow || 0) >= 0 ? 'be-pos' : 'be-neg' %>">
+                                <%= (row.cumulativeCashFlow || 0) >= 0 ? '' : '-' %><%= formatCurrency(Math.abs(row.cumulativeCashFlow || 0)) %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- RIGHT: Conclusion -->
+            <div>
+                <div class="section-label">Conclusion</div>
+                <div class="conclusion-card">
+                    <div class="conclusion-icon">🎯</div>
+                    <div class="conclusion-title">Investment Recommendation</div>
+                    <div class="conclusion-text">
+                        <% if (financialResults.feasibilityStatus === 'Feasible') { %>
+                        Strong financial performance with <strong><%= (financialResults.roi * 100).toFixed(1) %>% ROI</strong> and
+                        <strong><%= financialResults.paybackPeriod.toFixed(1) %>-year payback period</strong>.
+                        Break-even is achieved in <strong>Year <%= financialResults.breakEvenYear || 'N/A' %></strong>.
+                        The project is <strong>highly recommended for implementation</strong>.
+                        <% } else { %>
+                        The project shows a <strong><%= (financialResults.roi * 100).toFixed(1) %>% ROI</strong>,
+                        which does not meet the feasibility threshold.
+                        A payback period of <strong><%= financialResults.paybackPeriod.toFixed(1) %> years</strong> is projected.
+                        Consider revising the cost structure or benefit assumptions before proceeding.
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="spacer-md"></div>
+                <div class="section-label">Score Summary</div>
+                <div class="card-dark" style="padding: 12px;">
+                    <div style="text-align:center; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="font-size:7.5px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">IE Score</div>
+                        <div style="font-size:32px; font-weight:900; color:var(--gold-light);"><%= financialResults.ieScore.toFixed(0) %></div>
+                        <div style="font-size:8px; color:rgba(255,255,255,0.5);">out of 100</div>
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <% const score = financialResults.ieScore;
+                           const scoreLabel = score >= 75 ? 'Excellent' : score >= 55 ? 'Good' : score >= 35 ? 'Moderate' : 'Poor';
+                           const scoreColor = score >= 75 ? '#22c55e' : score >= 55 ? '#c9a227' : score >= 35 ? '#f97316' : '#ef4444';
+                        %>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:8.5px; padding: 4px 0;">
+                            <span style="color:rgba(255,255,255,0.6);">Rating</span>
+                            <span style="font-weight:700; color:<%= scoreColor %>;"><%= scoreLabel %></span>
+                        </div>
+                        <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:4px; overflow:hidden;">
+                            <div style="height:100%; width:<%= Math.min(100, financialResults.ieScore).toFixed(0) %>%; background:linear-gradient(to right, var(--gold-dark), var(--gold-light)); border-radius:3px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spacer-md"></div>
+                <div class="section-label">Risk Overview</div>
+                <div class="card">
+                    <% const riskLevel = financialResults.ieScore >= 70 ? 'Low' : financialResults.ieScore >= 45 ? 'Medium' : 'High';
+                       const riskIcon = riskLevel === 'Low' ? '🟢' : riskLevel === 'Medium' ? '🟡' : '🔴'; %>
+                    <div class="info-row">
+                        <span class="info-icon"><%= riskIcon %></span>
+                        <span class="info-label">Risk Level</span>
+                        <span class="info-value"><%= riskLevel %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-icon">📊</span>
+                        <span class="info-label">Break-Even</span>
+                        <span class="info-value">Year <%= financialResults.breakEvenYear || 'N/A' %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-icon">💰</span>
+                        <span class="info-label">NPV Result</span>
+                        <span class="info-value" style="color:<%= financialResults.npv >= 0 ? '#16a34a' : '#dc2626' %>;">
+                            <%= financialResults.npv >= 0 ? 'Positive' : 'Negative' %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-icon">🔖</span>
+                        <span class="info-label">Quadrant</span>
+                        <span class="info-value"><%= mcfarlan.quadrant %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-footer">
+        <span class="footer-left">This report was automatically generated by InvesTEchy System &copy; 2026</span>
+        <span class="page-number">Page 3 of 3</span>
+        <span class="footer-right">Kada IT-Investasi</span>
+    </div>
+</div>
+
+</body>
+</html>

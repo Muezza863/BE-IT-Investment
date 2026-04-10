@@ -21,6 +21,7 @@ console.log("✅ All imports loaded successfully");
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", true); // CRITICAL for ngrok/proxy support
 const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,8 +68,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, "..", "FE-Test")));
 
-// TEMPORARILY DISABLE PASSPORT
-// app.use(passport.initialize());
+// PASSPORT
+app.use(passport.initialize());
 
 // TEMPORARILY DISABLE REQUEST LOGGING
 // app.use((req, res, next) => {

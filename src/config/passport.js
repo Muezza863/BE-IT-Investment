@@ -6,14 +6,15 @@ import { generateToken } from "../helpers/token.js";
 
 dotenv.config();
 
-const appBaseUrl = (process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/+$/, "");
-const googleCallbackUrl = process.env.GOOGLE_REDIRECT_URI || `${appBaseUrl}/api/auth/google/callback`;
+const appBaseUrl = (process.env.BASE_URL || "").replace(/\/+$/, "");
+const googleCallbackUrl = process.env.GOOGLE_REDIRECT_URI || 
+  (appBaseUrl ? `${appBaseUrl}/api/auth/google/callback` : "/api/auth/google/callback");
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   console.warn("⚠️ GOOGLE OAUTH is not fully configured: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing.");
 }
 
-console.log(`✅ Google OAuth callback URL: ${googleCallbackUrl} (must match Google Console)`);
+console.log(`✅ Google OAuth callback URL: ${googleCallbackUrl} (Relative path is OK if proxy: true is set)`);
 
 // =====================================
 // GOOGLE OAUTH STRATEGY (FINAL CLEAN)
@@ -24,11 +25,14 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: googleCallbackUrl,
+      proxy: true,
     },
 
     async (accessToken, refreshToken, profile, done) => {
+      console.log("🔵 Google OAuth verify callback triggered");
       try {
         const email = profile.emails?.[0]?.value || null;
+        console.log(`📧 Received email from Google: ${email}`);
         const avatar = profile.photos?.[0]?.value || null;
 
         if (!email) {
